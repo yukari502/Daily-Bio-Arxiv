@@ -1,10 +1,3 @@
-#!/usr/bin/env python3
-"""
-Generate a static JSON index of all markdown files in the data directory.
-This script scans the data directory for markdown files and creates a JSON index
-that can be used by the frontend to display the files without requiring GitHub API access.
-"""
-
 import os
 import json
 import glob

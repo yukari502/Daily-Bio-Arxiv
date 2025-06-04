@@ -1,0 +1,132 @@
+---
+layout: default
+title: updates
+---
+
+<h1>最新更新</h1>
+
+<div id="updates-container">
+    {% assign sorted_updates = site.my_updates | sort: "date" | reverse %} {# 遍历你定义的 collection，按日期降序排序 #}
+    {% assign current_year = '' %}
+
+    {% for update in sorted_updates %}
+        {% assign update_year = update.date | date: "%Y" %}
+        {% assign update_date_string = update.date | date: "%Y年%m月%d日" %}
+
+        {# 按年份分组的逻辑 #}
+        {% if update_year != current_year %}
+            {% if current_year != '' %}
+                </div> {% endif %}
+            <button class="accordion-header year-header" data-target="year-{{ update_year }}">
+                <h2>{{ update_year }}年</h2>
+            </button>
+            <div id="year-{{ update_year }}" class="accordion-content">
+            {% assign current_year = update_year %}
+        {% endif %}
+
+        {# 每个日期的更新内容 #}
+        <button class="accordion-header date-header" data-target="date-{{ update.date | date: "%Y%m%d" }}">
+            <h3>{{ update_date_string }}</h3>
+        </button>
+        <div id="date-{{ update.date | date: "%Y%m%d" }}" class="accordion-content">
+            {{ update.content }} {# 渲染 Markdown 内容 #}
+        </div>
+    {% endfor %}
+    {% if current_year != '' %}
+        </div> {% endif %}
+</div>
+
+<style>
+    /* 基本样式 */
+    .accordion-header {
+        background-color: #f1f1f1;
+        color: #444;
+        cursor: pointer;
+        padding: 18px;
+        width: 100%;
+        border: none;
+        text-align: left;
+        outline: none;
+        font-size: 15px;
+        transition: 0.4s;
+        margin-bottom: 5px;
+        border-radius: 4px;
+    }
+
+    .accordion-header:hover {
+        background-color: #ddd;
+    }
+
+    .accordion-header.active {
+        background-color: #ccc;
+    }
+
+    /* 年份标题样式 */
+    .year-header {
+        background-color: #e0e0e0;
+        font-size: 20px;
+        font-weight: bold;
+        margin-top: 20px;
+        margin-bottom: 10px;
+        padding: 20px 18px;
+    }
+
+    /* 日期标题样式 */
+    .date-header {
+        background-color: #f9f9f9;
+        font-size: 16px;
+        padding: 15px 18px;
+    }
+
+    .accordion-content {
+        padding: 0 18px;
+        background-color: white;
+        max-height: 0; /* 初始隐藏 */
+        overflow: hidden;
+        transition: max-height 0.3s ease-out; /* 平滑过渡 */
+        margin-bottom: 10px;
+        border: 1px solid #eee;
+        border-top: none;
+        border-radius: 0 0 4px 4px;
+    }
+
+    /* 当折叠头被激活时，展开内容 */
+    .accordion-header.active + .accordion-content {
+        max-height: 1000px; /* 足够大以容纳内容，可根据实际内容调整 */
+        padding-top: 10px;
+        padding-bottom: 10px;
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var accHeaders = document.querySelectorAll('.accordion-header');
+
+        accHeaders.forEach(function(header) {
+            header.addEventListener('click', function() {
+                var targetId = this.getAttribute('data-target');
+                var content = document.getElementById(targetId);
+
+                // 切换当前折叠项的激活状态
+                this.classList.toggle('active');
+                if (content.style.maxHeight) {
+                    content.style.maxHeight = null; // 折叠
+                } else {
+                    content.style.maxHeight = content.scrollHeight + "px"; // 展开
+                }
+
+                // 可选：如果你想实现点击一个展开，其他折叠，可以添加以下逻辑
+                // 但是对于多层嵌套折叠（年份和日期），这会更复杂，这里仅折叠兄弟元素
+                /*
+                accHeaders.forEach(function(otherHeader) {
+                    if (otherHeader !== header && otherHeader.classList.contains('active')) {
+                        otherHeader.classList.remove('active');
+                        var otherContent = document.getElementById(otherHeader.getAttribute('data-target'));
+                        otherContent.style.maxHeight = null;
+                    }
+                });
+                */
+            });
+        });
+    });
+</script>

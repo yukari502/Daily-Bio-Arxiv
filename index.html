@@ -114,10 +114,10 @@
     </style>
 </head>
 <body>
-    <h1>最新更新</h1>
+    <h1>Biology arXiv updates field in NC</h1>
 
     <div id="updates-container">
-        <div class="loading">加载中，请稍候...</div>
+        <div class="loading">少女祈禱中.....</div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
@@ -133,7 +133,7 @@
                     const response = await fetch('data/index.json');
 
                     if (!response.ok) {
-                        throw new Error('无法获取更新文件列表');
+                        throw new Error('无法获取更新文件列表,請刷新重試，或者聯繫repository');
                     }
 
                     const data = await response.json();
@@ -168,7 +168,7 @@
                     // 添加年份标题
                     html += `
                         <button class="accordion-header year-header" data-target="year-${year}">
-                            <h2>${year}年</h2>
+                            <h2>${year}</h2>
                         </button>
                         <div id="year-${year}" class="accordion-content">
                     `;
@@ -177,7 +177,7 @@
                     files.forEach(file => {
                         const dateStr = file.date;
                         const [year, month, day] = dateStr.split('-');
-                        const formattedDate = `${year}年${month}月${day}日`;
+                        const formattedDate = `${year}-${month}-${day}`;
                         const fileId = dateStr.replace(/-/g, '');
 
                         html += `

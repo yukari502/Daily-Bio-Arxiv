@@ -1,9 +1,0 @@
-title: Neurons and Cognition Updates
-description: A collection of daily Neurons and Cognition updates.
-theme: minima # 
-
-
-collections:
-  NC_updates: # 这个名称对应你的文件夹 `_my_updates`
-    output: true # 确保这些文件会被 Jekyll 处理并生成页面
-    permalink: /updates/:name/ # 可选：定义每个更新的 URL 结构，:name 会是文件名（如 2023-01-01）

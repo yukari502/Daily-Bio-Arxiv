@@ -1,7 +1,3 @@
----
-date: today
----
-
 ### [{idx}] [{title}]({url})
 *{authors}*
 

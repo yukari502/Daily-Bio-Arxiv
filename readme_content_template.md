@@ -1,1 +1,1 @@
-[{date}]({url})
+[{date}]({url}) 

@@ -1,4 +1,6 @@
 today=`date -u "+%Y-%m-%d"` # Current date in UTC
+
+
 cd daily_arxiv
 scrapy crawl arxiv -o ../NC_updates/${today}.jsonl
 

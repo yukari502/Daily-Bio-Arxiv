@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NC Updates</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #2c3e50;
+        }
+        
+        /* 基本样式 */
+        .accordion-header {
+            background-color: #f1f1f1;
+            color: #444;
+            cursor: pointer;
+            padding: 18px;
+            width: 100%;
+            border: none;
+            text-align: left;
+            outline: none;
+            font-size: 15px;
+            transition: 0.4s;
+            margin-bottom: 5px;
+            border-radius: 4px;
+        }
+
+        .accordion-header:hover {
+            background-color: #ddd;
+        }
+
+        .accordion-header.active {
+            background-color: #ccc;
+        }
+
+        /* 年份标题样式 */
+        .year-header {
+            background-color: #e0e0e0;
+            font-size: 20px;
+            font-weight: bold;
+            margin-top: 20px;
+            margin-bottom: 10px;
+            padding: 20px 18px;
+        }
+
+        /* 日期标题样式 */
+        .date-header {
+            background-color: #f9f9f9;
+            font-size: 16px;
+            padding: 15px 18px;
+        }
+
+        .accordion-content {
+            padding: 0 18px;
+            background-color: white;
+            max-height: 0; /* 初始隐藏 */
+            overflow: hidden;
+            transition: max-height 0.3s ease-out; /* 平滑过渡 */
+            margin-bottom: 10px;
+            border: 1px solid #eee;
+            border-top: none;
+            border-radius: 0 0 4px 4px;
+        }
+
+        /* 当折叠头被激活时，展开内容 */
+        .accordion-header.active + .accordion-content {
+            max-height: 2000px; /* 足够大以容纳内容 */
+            padding-top: 10px;
+            padding-bottom: 10px;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 20px;
+            font-style: italic;
+            color: #666;
+        }
+        
+        .error {
+            color: #e74c3c;
+            padding: 10px;
+            background-color: #fadbd8;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        
+        /* 内容样式 */
+        .markdown-content {
+            padding: 15px;
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            
+            .accordion-header {
+                padding: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>最新更新</h1>
+    
+    <div id="updates-container">
+        <div class="loading">加载中，请稍候...</div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const updatesContainer = document.getElementById('updates-container');
+            
+            // 从静态JSON文件获取更新列表
+            async function fetchUpdates() {
+                try {
+                    // 使用相对路径获取静态JSON索引
+                    const response = await fetch('NC_updates/index.json');
+                    
+                    if (!response.ok) {
+                        throw new Error('无法获取更新文件列表');
+                    }
+                    
+                    const data = await response.json();
+                    
+                    if (!data.filesByYear || Object.keys(data.filesByYear).length === 0) {
+                        updatesContainer.innerHTML = '<div class="error">暂无更新内容</div>';
+                        return;
+                    }
+                    
+                    // 渲染UI
+                    renderUpdates(data.filesByYear);
+                    
+                    // 添加事件监听器
+                    setupAccordion();
+                    
+                } catch (error) {
+                    console.error('Error fetching updates:', error);
+                    updatesContainer.innerHTML = `<div class="error">加载更新内容失败: ${error.message}</div>`;
+                }
+            }
+            
+            // 渲染更新内容
+            function renderUpdates(filesByYear) {
+                let html = '';
+                
+                // 按年份降序排序
+                const years = Object.keys(filesByYear).sort((a, b) => b - a);
+                
+                years.forEach(year => {
+                    const files = filesByYear[year];
+                    
+                    // 添加年份标题
+                    html += `
+                        <button class="accordion-header year-header" data-target="year-${year}">
+                            <h2>${year}年</h2>
+                        </button>
+                        <div id="year-${year}" class="accordion-content">
+                    `;
+                    
+                    // 添加该年份下的所有文件
+                    files.forEach(file => {
+                        const dateStr = file.date;
+                        const [year, month, day] = dateStr.split('-');
+                        const formattedDate = `${year}年${month}月${day}日`;
+                        const fileId = dateStr.replace(/-/g, '');
+                        
+                        html += `
+                            <button class="accordion-header date-header" data-target="date-${fileId}" data-path="${file.path}">
+                                <h3>${formattedDate}</h3>
+                            </button>
+                            <div id="date-${fileId}" class="accordion-content">
+                                <div class="markdown-content" id="content-${fileId}">
+                                    <div class="loading">加载内容中...</div>
+                                </div>
+                            </div>
+                        `;
+                    });
+                    
+                    // 关闭年份div
+                    html += '</div>';
+                });
+                
+                updatesContainer.innerHTML = html;
+            }
+            
+            // 设置折叠面板功能
+            function setupAccordion() {
+                const accHeaders = document.querySelectorAll('.accordion-header');
+                
+                accHeaders.forEach(header => {
+                    header.addEventListener('click', function() {
+                        const targetId = this.getAttribute('data-target');
+                        const content = document.getElementById(targetId);
+                        
+                        // 切换当前折叠项的激活状态
+                        this.classList.toggle('active');
+                        
+                        if (content.style.maxHeight) {
+                            content.style.maxHeight = null; // 折叠
+                        } else {
+                            content.style.maxHeight = '2000px'; // 展开，使用足够大的值
+                            
+                            // 如果是日期标题，且有data-path属性，加载内容
+                            if (this.classList.contains('date-header')) {
+                                const path = this.getAttribute('data-path');
+                                const fileId = targetId.replace('date-', '');
+                                const contentDiv = document.getElementById(`content-${fileId}`);
+                                
+                                // 如果内容尚未加载，则加载
+                                if (contentDiv.querySelector('.loading')) {
+                                    loadMarkdownContent(path, contentDiv);
+                                }
+                            }
+                        }
+                    });
+                });
+            }
+            
+            // 加载Markdown内容
+            async function loadMarkdownContent(path, container) {
+                try {
+                    const response = await fetch(path);
+                    
+                    if (!response.ok) {
+                        throw new Error('无法加载内容');
+                    }
+                    
+                    const markdown = await response.text();
+                    container.innerHTML = marked.parse(markdown);
+                    
+                } catch (error) {
+                    console.error('Error loading markdown:', error);
+                    container.innerHTML = `<div class="error">加载内容失败: ${error.message}</div>`;
+                }
+            }
+            
+            // 初始化
+            fetchUpdates();
+        });
+    </script>
+</body>
+</html>

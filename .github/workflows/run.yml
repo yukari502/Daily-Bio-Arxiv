@@ -8,6 +8,8 @@ on:
     - cron: "30 16 * * *"
   workflow_dispatch:
 
+permissions:
+  contents: write 
 
 jobs:
   build:
@@ -38,4 +40,4 @@ jobs:
     - name: Push changes
       uses: ad-m/github-push-action@master
       with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
+        github_token: ${{ secrets.TOKEN }}

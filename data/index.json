@@ -1,25 +1,25 @@
 {
-  "updated": "2025-06-04 12:10:54",
+  "updated": "2025-06-04 15:51:34",
   "files": [
     {
       "name": "2025-06-04.md",
       "date": "2025-06-04",
-      "path": "NC_updates/2025-06-04.md"
+      "path": "data/2025-06-04.md"
     },
     {
       "name": "2025-06-03.md",
       "date": "2025-06-03",
-      "path": "NC_updates/2025-06-03.md"
+      "path": "data/2025-06-03.md"
     },
     {
       "name": "2025-06-02.md",
       "date": "2025-06-02",
-      "path": "NC_updates/2025-06-02.md"
+      "path": "data/2025-06-02.md"
     },
     {
       "name": "2025-06-01.md",
       "date": "2025-06-01",
-      "path": "NC_updates/2025-06-01.md"
+      "path": "data/2025-06-01.md"
     }
   ],
   "filesByYear": {
@@ -27,22 +27,22 @@
       {
         "name": "2025-06-04.md",
         "date": "2025-06-04",
-        "path": "NC_updates/2025-06-04.md"
+        "path": "data/2025-06-04.md"
       },
       {
         "name": "2025-06-03.md",
         "date": "2025-06-03",
-        "path": "NC_updates/2025-06-03.md"
+        "path": "data/2025-06-03.md"
       },
       {
         "name": "2025-06-02.md",
         "date": "2025-06-02",
-        "path": "NC_updates/2025-06-02.md"
+        "path": "data/2025-06-02.md"
       },
       {
         "name": "2025-06-01.md",
         "date": "2025-06-01",
-        "path": "NC_updates/2025-06-01.md"
+        "path": "data/2025-06-01.md"
       }
     ]
   }

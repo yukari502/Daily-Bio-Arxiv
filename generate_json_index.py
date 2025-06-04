@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 """
 Generate a static JSON index of all markdown files in the data directory.
+This script scans the data directory for markdown files and creates a JSON index
+that can be used by the frontend to display the files without requiring GitHub API access.
 """
 
 import os
@@ -10,6 +12,11 @@ from datetime import datetime
 
 def generate_json_index():
     """Generate a JSON index of all markdown files in the data directory."""
+    # Ensure data directory exists
+    if not os.path.exists('data'):
+        os.makedirs('data')
+        print("Created data directory")
+        return
     
     # Get all markdown files in the data directory
     md_files = glob.glob('data/*.md')

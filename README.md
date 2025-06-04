@@ -1,9 +1,13 @@
 # About
-This is a forked respostories
-This tool will daily crawl https://arxiv.org and use LLMs to summarize them.
+This is a forked and modified repo
+The orginal repo 
+https://github.com/dw-dengwei/daily-arXiv-ai-enhanced
+
+This tool will daily crawl https://arxiv.org and use LLMs to summarize them then show them in github pages.
 
 # How to use
-This repo will daily crawl arXiv papers about **cs.CV, cs.GR and cs.CL**, and use **DeepSeek** to summarize the papers in **Chinese**.
+This repo will daily crawl arXiv papers mainly about biology and use **DeepSeek chat** to summarize the papers in **Chinese**.(English optional)
+
 If you wish to crawl other arXiv categories, use other LLMs or other language, please follow the bellow instructions.
 Otherwise, you can directly use this repo. Please star it if you like :)
 
@@ -20,10 +24,9 @@ Otherwise, you can directly use this repo. Please star it if you like :)
    4. `EMAIL`: your email for push to github
    5. `NAME`: your name for push to github
 7. Go to your-own-repo -> Actions -> arXiv-daily-ai-enhanced
-8. You can manually click **Run workflow** to test if it works well (it may takes about one hour). 
-By default, this action will automatically run every day
+8. You can manually click **Run workflow** to test if it works well. By default, this action will automatically run every day
 You can modify it in `.github/workflows/run.yml`
-9. If you wish to modify the content in `README.md`, do not directly edit README.md. You should edit `template.md`.
+
 
 
 

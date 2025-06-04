@@ -6,35 +6,57 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write 
-  
+  contents: write # 确保有写入权限
+
 jobs:
   build:
-
     runs-on: ubuntu-latest
-
     steps:
-    - uses: actions/checkout@v4
-    - name: Install dependencies
-      run: |
-        curl -LsSf https://astral.sh/uv/install.sh | sh
-        uv sync
-    - name: Run script
-      run: |
-        source .venv/bin/activate
-        export OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}
-        export OPENAI_BASE_URL=${{ secrets.OPENAI_BASE_URL }}
-        export LANGUAGE="${{ vars.LANGUAGE }}"
-        export CATEGORIES="${{ vars.CATEGORIES }}"
-        export MODEL_NAME="${{ vars.MODEL_NAME }}"
-        bash run.sh
-    - name: commit
-      run: |
-        git config --global user.email "${{ vars.EMAIL }}"
-        git config --global user.name "${{ vars.NAME }}"
-        git add .
-        git commit -m "update"
-    - name: Push changes
-      uses: ad-m/github-push-action@master
-      with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0 # 确保获取完整历史，以便后续的 pull/rebase 正常工作
+
+      - name: Install dependencies
+        run: |
+          curl -LsSf https://astral.sh/uv/install.sh | sh
+          uv sync
+
+      - name: Run script
+        run: |
+          source .venv/bin/activate
+          export OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}
+          export OPENAI_BASE_URL=${{ secrets.OPENAI_BASE_URL }}
+          export LANGUAGE="${{ vars.LANGUAGE }}"
+          export CATEGORIES="${{ vars.CATEGORIES }}"
+          export MODEL_NAME="${{ vars.MODEL_NAME }}"
+          bash run.sh
+
+      - name: Configure Git
+        run: |
+          git config user.email "${{ vars.EMAIL }}"
+          git config user.name "${{ vars.NAME }}"
+
+      - name: Commit changes
+        run: |
+          git add .
+          # 只有在有实际修改时才提交，避免空提交
+          git diff --staged --quiet || git commit -m "Automated update by workflow"
+
+      - name: Pull remote changes before pushing (Critical step!)
+        run: |
+          # 尝试拉取远程更新并进行 rebase
+          # 这将确保你的本地提交（由Action生成）放在远程最新提交之上
+          git pull --rebase origin main # 假设你的分支是 main
+        env:
+          # `actions/checkout` 已经配置了认证，所以通常不需要在这里重复设置
+          # 但为了清晰起见，明确设置 token
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+
+      - name: Push changes
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          # 确保推送到正确的分支
+          branch: main # 明确指定目标分支

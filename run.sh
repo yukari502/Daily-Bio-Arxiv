@@ -11,6 +11,6 @@ cd ../to_md
 python convert.py --data ../data/${today}_AI_enhanced_${LANGUAGE}.jsonl
 
 cd ..
-python update_readme.py
+## python update_readme.py
 
 python generate_json_index.py

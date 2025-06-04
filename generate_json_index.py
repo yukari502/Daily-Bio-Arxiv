@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Generate a static JSON index of all markdown files in the NC_updates directory.
+Generate a static JSON index of all markdown files in the data directory.
 """
 
 import os
@@ -9,10 +9,10 @@ import glob
 from datetime import datetime
 
 def generate_json_index():
-    """Generate a JSON index of all markdown files in the NC_updates directory."""
+    """Generate a JSON index of all markdown files in the data directory."""
     
-    # Get all markdown files in the NC_updates directory
-    md_files = glob.glob('NC_updates/*.md')
+    # Get all markdown files in the data directory
+    md_files = glob.glob('data/*.md')
     
     # Create a list of file information
     files_info = []
@@ -55,7 +55,7 @@ def generate_json_index():
     }
     
     # Write the index to a JSON file
-    with open('NC_updates/index.json', 'w', encoding='utf-8') as f:
+    with open('data/index.json', 'w', encoding='utf-8') as f:
         json.dump(index, f, ensure_ascii=False, indent=2)
     
     print(f"Generated index.json with {len(files_info)} files")

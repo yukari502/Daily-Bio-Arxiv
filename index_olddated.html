@@ -75,7 +75,7 @@
 
         /* 当折叠头被激活时，展开内容 */
         .accordion-header.active + .accordion-content {
-            max-height: 2000px; /* 足够大以容纳内容 */
+            max-height: 1000px; /* 足够大以容纳内容，可根据实际内容调整 */
             padding-top: 10px;
             padding-bottom: 10px;
         }
@@ -113,10 +113,10 @@
     </style>
 </head>
 <body>
-    <h1>最新更新</h1>
+    <h1>NC updates</h1>
     
     <div id="updates-container">
-        <div class="loading">加载中，请稍候...</div>
+        <div class="loading">少女祈禱中</div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
@@ -124,11 +124,15 @@
         document.addEventListener('DOMContentLoaded', function() {
             const updatesContainer = document.getElementById('updates-container');
             
-            // 从静态JSON文件获取更新列表
+            // 获取NC_updates目录下的所有md文件
             async function fetchUpdates() {
                 try {
-                    // 使用相对路径获取静态JSON索引
-                    const response = await fetch('NC_updates/index.json');
+                    // 使用GitHub API获取仓库内容
+                    const repoOwner = 'yukari502';
+                    const repoName = 'yukari502.github.io';
+                    const path = 'NC_updates';
+                    
+                    const response = await fetch(`https://api.github.com/repos/${repoOwner}/${repoName}/contents/${path}`);
                     
                     if (!response.ok) {
                         throw new Error('无法获取更新文件列表');
@@ -136,13 +140,26 @@
                     
                     const data = await response.json();
                     
-                    if (!data.filesByYear || Object.keys(data.filesByYear).length === 0) {
+                    // 过滤出.md文件并按日期排序（降序）
+                    const mdFiles = data
+                        .filter(file => file.name.endsWith('.md'))
+                        .sort((a, b) => {
+                            // 从文件名中提取日期（假设格式为YYYY-MM-DD.md）
+                            const dateA = a.name.replace('.md', '');
+                            const dateB = b.name.replace('.md', '');
+                            return dateB.localeCompare(dateA); // 降序排列
+                        });
+                    
+                    if (mdFiles.length === 0) {
                         updatesContainer.innerHTML = '<div class="error">暂无更新内容</div>';
                         return;
                     }
                     
+                    // 按年份分组
+                    const filesByYear = groupByYear(mdFiles);
+                    
                     // 渲染UI
-                    renderUpdates(data.filesByYear);
+                    renderUpdates(filesByYear);
                     
                     // 添加事件监听器
                     setupAccordion();
@@ -151,6 +168,24 @@
                     console.error('Error fetching updates:', error);
                     updatesContainer.innerHTML = `<div class="error">加载更新内容失败: ${error.message}</div>`;
                 }
+            }
+            
+            // 按年份分组文件
+            function groupByYear(files) {
+                const groups = {};
+                
+                files.forEach(file => {
+                    // 从文件名中提取年份（假设格式为YYYY-MM-DD.md）
+                    const year = file.name.substring(0, 4);
+                    
+                    if (!groups[year]) {
+                        groups[year] = [];
+                    }
+                    
+                    groups[year].push(file);
+                });
+                
+                return groups;
             }
             
             // 渲染更新内容
@@ -173,13 +208,13 @@
                     
                     // 添加该年份下的所有文件
                     files.forEach(file => {
-                        const dateStr = file.date;
+                        const dateStr = file.name.replace('.md', '');
                         const [year, month, day] = dateStr.split('-');
                         const formattedDate = `${year}年${month}月${day}日`;
                         const fileId = dateStr.replace(/-/g, '');
                         
                         html += `
-                            <button class="accordion-header date-header" data-target="date-${fileId}" data-path="${file.path}">
+                            <button class="accordion-header date-header" data-target="date-${fileId}" data-url="${file.download_url}">
                                 <h3>${formattedDate}</h3>
                             </button>
                             <div id="date-${fileId}" class="accordion-content">
@@ -214,15 +249,15 @@
                         } else {
                             content.style.maxHeight = '2000px'; // 展开，使用足够大的值
                             
-                            // 如果是日期标题，且有data-path属性，加载内容
+                            // 如果是日期标题，且有data-url属性，加载内容
                             if (this.classList.contains('date-header')) {
-                                const path = this.getAttribute('data-path');
+                                const url = this.getAttribute('data-url');
                                 const fileId = targetId.replace('date-', '');
                                 const contentDiv = document.getElementById(`content-${fileId}`);
                                 
                                 // 如果内容尚未加载，则加载
                                 if (contentDiv.querySelector('.loading')) {
-                                    loadMarkdownContent(path, contentDiv);
+                                    loadMarkdownContent(url, contentDiv);
                                 }
                             }
                         }
@@ -231,9 +266,9 @@
             }
             
             // 加载Markdown内容
-            async function loadMarkdownContent(path, container) {
+            async function loadMarkdownContent(url, container) {
                 try {
-                    const response = await fetch(path);
+                    const response = await fetch(url);
                     
                     if (!response.ok) {
                         throw new Error('无法加载内容');

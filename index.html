@@ -1,9 +1,23 @@
 <!DOCTYPE html>
-<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Biology arXiv Updates daily</title>
+
+    <link rel="icon" type="image/png" sizes="16x16" href="/img/favicon-16x16.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/img/favicon-32x32.png">
+    <link rel="icon" type="image/x-icon" href="/img/favicon.ico">
+
+    <link rel="apple-touch-icon" href="/img/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="/img/android-chrome-192x192.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="/img/android-chrome-512x512.png">
+
+    <link rel="manifest" href="/img/site.webmanifest">
+
+    <meta name="theme-color" content="#ffffff">
+    
+    
+    #css
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
@@ -112,9 +126,13 @@
             }
         }
     </style>
+
 </head>
+
+
+
 <body>
-    <h1>Biology arXiv updates field in NC</h1>
+    <h1>Biology arXiv updates，NC Peculiarly</h1>
 
     <div id="updates-container">
         <div class="loading">少女祈禱中.....</div>
@@ -133,7 +151,7 @@
                     const response = await fetch('data/index.json');
 
                     if (!response.ok) {
-                        throw new Error('无法获取更新文件列表,請刷新重試，或者聯繫repository');
+                        throw new Error('无法获取更新文件列表,請刷新重試。');
                     }
 
                     const data = await response.json();

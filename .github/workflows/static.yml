@@ -7,7 +7,7 @@ on:
    branches: ["main"]
   # Runs on pushes to the main branch, but only if the commit message contains [skip ci]
   schedule: # This is a cron schedule that runs at 16:50 UTC every day
-    - cron: "50 16 * * *"
+    - cron: "00 18 * * *"
    
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:

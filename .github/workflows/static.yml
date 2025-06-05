@@ -2,13 +2,16 @@
 name: Deploy static content to Pages
 
 on:
-  # Runs on pushes targeting the default branch
-  push:
-   branches: ["main"]
-  # Runs on pushes to the main branch, but only if the commit message contains [skip ci]
-  schedule: # This is a cron schedule that runs at 16:50 UTC every day
-    - cron: "00 18 * * *"
-   
+  workflow_run:
+    workflows: ["arXiv-daily"]
+    types:
+      - completed
+    branches:
+      - main
+  schedule:
+    - cron: "30 17 * * *" 
+
+    
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 

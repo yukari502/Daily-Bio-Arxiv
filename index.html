@@ -28,8 +28,7 @@
 
 
 
-    
-    <div id="updates-container">
+ <div id="updates-container">
         <div class="loading">少女祈禱中.....</div>
     </div>
 
@@ -154,29 +153,6 @@
                 updatesContainer.innerHTML = html;
             }
 
-            // 递归调整所有父级折叠内容的高度
-            function adjustParentMaxHeight(element) {
-                let current = element;
-                while (current) {
-                    // 确保我们只处理具有max-height属性的accordion-content
-                    if (current.classList.contains('accordion-content')) {
-                        // 强制浏览器重新计算布局
-                        current.offsetHeight; // 读取 offsetHeight 属性会强制浏览器重新计算布局
-
-                        // 如果当前是展开状态，则更新其maxHeight
-                        if (current.style.maxHeight && current.style.maxHeight !== '0px') {
-                            current.style.maxHeight = current.scrollHeight + 'px';
-                        }
-                    }
-                    current = current.parentElement;
-                    // 向上查找直到 updates-container 或者没有父元素
-                    if (current && current.id === 'updates-container') {
-                        break;
-                    }
-                }
-            }
-
-
             // 设置折叠面板功能
             function setupAccordion() {
                 const accHeaders = document.querySelectorAll('.accordion-header');
@@ -189,10 +165,8 @@
                         // Toggle current accordion item's active state
                         this.classList.toggle('active');
 
-                        if (content.style.maxHeight && content.style.maxHeight !== '0px') {
+                        if (content.style.maxHeight) {
                             content.style.maxHeight = null; // 折叠
-                            // 折叠时，也递归调整所有父级的高度
-                            adjustParentMaxHeight(content);
                         } else {
                             // 展开时，计算并设置实际内容高度
                             content.style.maxHeight = content.scrollHeight + "px"; // 使用 scrollHeight 确保初始展开高度足够
@@ -208,8 +182,6 @@
                                     loadMarkdownContent(path, contentDiv);
                                 }
                             }
-                            // 展开后也立即调整父级的高度，以防万一
-                            adjustParentMaxHeight(content);
                         }
                     });
                 });
@@ -227,11 +199,14 @@
                     const markdown = await response.text();
                     container.innerHTML = marked.parse(markdown);
 
-                    // 在内容加载并渲染后，递归调整所有父级折叠内容的高度
-                    // 增加 setTimeout 延迟以确保 DOM 渲染完成
-                    setTimeout(() => {
-                        adjustParentMaxHeight(container);
-                    }, 100); // 增加延迟时间，例如100ms，可以根据实际情况调整
+                    // 在内容加载并渲染后，调整父级accordion-content的高度，以适应新内容
+                    let parentContent = container.closest('.accordion-content');
+                    if (parentContent) {
+                        // 给予DOM足够的时间来渲染新内容，然后重新计算scrollHeight
+                        setTimeout(() => {
+                            parentContent.style.maxHeight = parentContent.scrollHeight + "px";
+                        }, 100); // 增加延迟时间，例如100ms，可以根据实际情况调整
+                    }
 
                 } catch (error) {
                     console.error('Error loading markdown:', error);

@@ -78,7 +78,8 @@ h1 {
 
 /* 当折叠头被激活时，展开内容 */
 .accordion-header.active + .accordion-content {
-    max-height: 2000px; /* 足够大以容纳内容 */
+    /* 这里的max-height会被JS动态计算，但可以设置一个较大的初始值 */
+    max-height: 2000px; /* 足够大以容纳内容，会被JS覆盖 */
     padding-top: 10px;
     padding-bottom: 10px;
     overflow-y: auto; /* 在这里添加滚动条 */

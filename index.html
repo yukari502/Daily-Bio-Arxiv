@@ -16,9 +16,7 @@
 
     <meta name="theme-color" content="#ffffff">
     
-    <link rel="stylesheet" href="style.css">
-
-</head>
+    <link rel="stylesheet" href="style.css"> </head>
 <body>
     <h1>Biology arXiv Updates daily</h1>
 
@@ -156,15 +154,15 @@
                         const targetId = this.getAttribute('data-target');
                         const content = document.getElementById(targetId);
 
-                        // Toggle current accordion item's active state
+                        // 切换当前折叠项的激活状态
                         this.classList.toggle('active');
 
                         if (content.style.maxHeight) {
                             content.style.maxHeight = null; // 折叠
                         } else {
-                            // 展开，并根据内容调整高度
+                            // 展开时，计算并设置实际内容高度
                             content.style.maxHeight = content.scrollHeight + "px"; // 使用 scrollHeight 确保初始展开高度足够
-
+                            
                             // 如果是日期标题，且有data-path属性，加载内容
                             if (this.classList.contains('date-header')) {
                                 const path = this.getAttribute('data-path');

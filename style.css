@@ -1,122 +1,256 @@
 body {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    line-height: 1.6;
+    font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol"; /* 更现代的字体堆栈 */
+    line-height: 1.7; /* 增加行高，提升可读性 */
     color: #333;
-    max-width: 1200px;
+    max-width: 1000px; /* 稍微收窄内容区域 */
     margin: 0 auto;
-    padding: 20px;
+    padding: 30px; /* 增加整体内边距 */
+    background-color: #f0f2f5; /* 轻柔的背景色 */
 }
 
 h1 {
     text-align: center;
-    margin-bottom: 30px;
+    margin-bottom: 40px; /* 增加底部间距 */
     color: #2c3e50;
+    font-size: 2.5em; /* 增大标题字号 */
+    font-weight: 700; /* 加粗标题 */
+    letter-spacing: 0.5px; /* 稍微增加字母间距 */
+}
+
+p {
+    margin-bottom: 15px; /* 段落间距 */
+    color: #555;
+}
+
+a {
+    color: #3498db; /* 链接颜色 */
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+a:hover {
+    color: #2980b9;
+    text-decoration: underline;
 }
 
 /* 基本样式 */
 .accordion-header {
-    background-color: #f1f1f1;
-    color: #444;
+    background-color: #ffffff; /* 白色背景 */
+    color: #333;
     cursor: pointer;
-    padding: 18px;
+    padding: 18px 25px; /* 增加左右内边距 */
     width: 100%;
     border: none;
     text-align: left;
     outline: none;
-    font-size: 15px;
-    transition: 0.4s;
-    margin-bottom: 5px;
-    border-radius: 4px;
+    font-size: 1.1em; /* 稍微增大字号 */
+    transition: all 0.3s ease; /* 更平滑的过渡效果 */
+    margin-bottom: 8px; /* 增加间距 */
+    border-radius: 8px; /* 增加圆角 */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05); /* 轻微的阴影 */
+    display: flex; /* 使用 flexbox 布局 */
+    align-items: center; /* 垂直居中 */
+    justify-content: space-between; /* 标题和箭头左右对齐 */
 }
 
 .accordion-header:hover {
-    background-color: #ddd;
+    background-color: #f8f8f8; /* 悬停时颜色变浅 */
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* 悬停时阴影加深 */
 }
 
 .accordion-header.active {
-    background-color: #ccc;
+    background-color: #e6e6e6; /* 激活时颜色 */
+    color: #2c3e50;
+    border-bottom-left-radius: 0; /* 激活时底部圆角取消，与内容块连接 */
+    border-bottom-right-radius: 0;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
 }
 
 /* 年份标题样式 */
 .year-header {
-    background-color: #e0e0e0;
-    font-size: 20px;
+    background-color: #34495e; /* 深色背景，作为主色 */
+    color: #ffffff; /* 白色字体 */
+    font-size: 2.2em; /* 增大字号 */
     font-weight: bold;
-    margin-top: 20px;
+    margin-top: 30px; /* 增加顶部间距 */
     margin-bottom: 10px;
-    padding: 20px 18px;
+    padding: 25px 30px; /* 增加内边距 */
+    border-radius: 10px; /* 更大圆角 */
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15); /* 更明显的阴影 */
+}
+
+.year-header.active {
+    background-color: #2c3e50; /* 激活时颜色更深 */
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
 }
 
 /* 月份标题样式 */
 .month-header {
-    background-color: #e9e9e9;
-    font-size: 18px;
+    background-color: #ecf0f1; /* 浅灰色背景 */
+    font-size: 1.4em; /* 增大字号 */
     font-weight: bold;
     margin-top: 15px;
     margin-bottom: 8px;
-    padding: 18px 18px;
+    padding: 15px 25px;
+    border-radius: 6px; /* 稍小圆角 */
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.month-header.active {
+    background-color: #dbe4e6;
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
 }
 
 /* 日期标题样式 */
 .date-header {
-    background-color: #f9f9f9;
-    font-size: 16px;
-    padding: 15px 18px;
+    background-color: #f9f9f9; /* 更浅的背景色 */
+    font-size: 1.05em;
+    padding: 12px 25px;
+    margin-top: 5px;
+    margin-bottom: 5px;
+    border-radius: 4px;
+    box-shadow: none; /* 日期头部不需要额外阴影 */
+    border: 1px solid #eee; /* 添加细边框 */
+}
+
+.date-header:hover {
+    background-color: #f0f0f0;
+    box-shadow: none;
+}
+
+.date-header.active {
+    background-color: #e0e0e0;
 }
 
 .accordion-content {
-    padding: 0 18px;
-    background-color: white;
+    padding: 15px 25px; /* 调整内边距 */
+    background-color: #ffffff;
     max-height: 0; /* 初始隐藏 */
     overflow: hidden;
-    transition: max-height 0.3s ease-out; /* 平滑过渡 */
-    margin-bottom: 10px;
-    border: 1px solid #eee;
+    transition: max-height 0.4s ease-out, padding 0.4s ease-out; /* 增加过渡效果，包括内边距 */
+    margin-bottom: 15px; /* 增加底部间距 */
+    border: 1px solid #ddd; /* 统一边框颜色 */
     border-top: none;
-    border-radius: 0 0 4px 4px;
+    border-radius: 0 0 8px 8px; /* 底部圆角 */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05); /* 内容区阴影 */
 }
 
-/* #updates-container > .accordion-content 定位年份的accordion-content */
+/* 针对年份的accordion-content，设置一个最小高度 */
 #updates-container > .accordion-content {
-    min-height: 1000px; /* 设置一个最小高度，确保内容可见 */
+    min-height: 360px; /* 保持之前的最小高度，确保可以容纳12个月 */
+    border-radius: 0 0 10px 10px; /* 配合年份头部的大圆角 */
 }
 
 /* 当折叠头被激活时，展开内容 */
 .accordion-header.active + .accordion-content {
-    /* 这里的max-height会被JS动态计算，但可以设置一个较大的初始值 */
-    max-height: 2000px; /* 足够大以容纳内容，会被JS覆盖 */
-    padding-top: 10px;
-    padding-bottom: 10px;
+    max-height: 2500px; /* 增大max-height以容纳更多内容 */
+    padding-top: 20px; /* 展开时增加内边距 */
+    padding-bottom: 20px;
     overflow-y: auto; /* 在这里添加滚动条 */
 }
 
+/* 滚动条样式优化 */
+.accordion-content::-webkit-scrollbar {
+    width: 8px;
+}
+
+.accordion-content::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+}
+
+.accordion-content::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 10px;
+}
+
+.accordion-content::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+
 .loading {
     text-align: center;
-    padding: 20px;
+    padding: 30px;
     font-style: italic;
-    color: #666;
+    color: #777;
+    font-size: 1.1em;
 }
 
 .error {
     color: #e74c3c;
-    padding: 10px;
-    background-color: #fadbd8;
-    border-radius: 4px;
-    margin: 10px 0;
+    padding: 15px;
+    background-color: #fdedec; /* 柔和的错误背景色 */
+    border-radius: 8px;
+    margin: 20px 0;
+    border: 1px solid #e74c3c;
 }
 
 /* 内容样式 */
 .markdown-content {
-    padding: 15px;
+    padding: 10px;
+    border-top: 1px dashed #eee; /* 内容顶部添加虚线分隔 */
+    margin-top: 15px;
 }
+
+.markdown-content h1,
+.markdown-content h2,
+.markdown-content h3 {
+    color: #34495e; /* Markdown 标题颜色与年份头部一致 */
+    margin-top: 25px;
+    margin-bottom: 10px;
+    font-weight: 600;
+}
+
+.markdown-content p {
+    margin-bottom: 10px;
+}
+
+.markdown-content ul {
+    list-style-type: disc;
+    margin-left: 20px;
+    padding-left: 0;
+}
+
+.markdown-content li {
+    margin-bottom: 5px;
+}
+
 
 /* 响应式设计 */
 @media (max-width: 768px) {
     body {
-        padding: 10px;
+        padding: 15px;
+    }
+
+    h1 {
+        font-size: 2em;
+        margin-bottom: 30px;
     }
 
     .accordion-header {
-        padding: 12px;
+        padding: 15px 20px;
+        font-size: 1em;
+    }
+
+    .year-header {
+        font-size: 1.8em;
+        padding: 20px 25px;
+    }
+
+    .month-header {
+        font-size: 1.2em;
+        padding: 12px 20px;
+    }
+
+    .date-header {
+        font-size: 0.95em;
+        padding: 10px 20px;
+    }
+
+    .accordion-content {
+        padding: 10px 20px;
     }
 }

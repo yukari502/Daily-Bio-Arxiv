@@ -80,10 +80,14 @@ a:hover {
 }
 
 .year-header.active {
-    background-color: #2c3e50; /* 激活时颜色更深 */
+    /* 将年份激活时的背景色改为更浅或更亮一点的颜色，避免变黑 */
+    background-color: #4a667b; /* 更改为更浅的深蓝色，避免过黑 */
+    /* 或者可以考虑使用主题色的浅色变体，例如： */
+    /* background-color: #5c7f9e; */
     border-bottom-left-radius: 0;
     border-bottom-right-radius: 0;
 }
+
 
 /* 月份标题样式 */
 .month-header {

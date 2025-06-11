@@ -35,7 +35,6 @@
             async function fetchUpdates() {
                 try {
                     // 使用相对路径获取静态JSON索引
-                    // 保持路径为 'data/index.json'，因为 index.json 位于 data 文件夹下
                     const response = await fetch('data/index.json');
 
                     if (!response.ok) {
@@ -161,18 +160,18 @@
                         this.classList.toggle('active');
 
                         if (content.style.maxHeight) {
-                            content.style.maxHeight = null; // Collapse
+                            content.style.maxHeight = null; // 折叠
                         } else {
-                            // Expand and load content if it's a date header and not already loaded
-                            content.style.maxHeight = content.scrollHeight + "px"; // Set to scrollHeight for initial expansion
+                            // 展开，并根据内容调整高度
+                            content.style.maxHeight = content.scrollHeight + "px"; // 使用 scrollHeight 确保初始展开高度足够
 
-                            // If it's a date header, and has data-path attribute, load content
+                            // 如果是日期标题，且有data-path属性，加载内容
                             if (this.classList.contains('date-header')) {
                                 const path = this.getAttribute('data-path');
                                 const fileId = targetId.replace('date-', '');
                                 const contentDiv = document.getElementById(`content-${fileId}`);
 
-                                // If content hasn't been loaded yet (still shows loading message)
+                                // 如果内容尚未加载，则加载
                                 if (contentDiv.querySelector('.loading')) {
                                     loadMarkdownContent(path, contentDiv);
                                 }
@@ -194,13 +193,13 @@
                     const markdown = await response.text();
                     container.innerHTML = marked.parse(markdown);
 
-                    // Adjust the parent accordion-content max-height after content is loaded
+                    // 加载内容后，调整父级accordion-content的高度，以适应新内容
                     let parentContent = container.closest('.accordion-content');
                     if (parentContent) {
-                         // A small delay to allow DOM to render the new content before recalculating scrollHeight
+                        // 给予DOM足够的时间来渲染新内容，然后重新计算scrollHeight
                         setTimeout(() => {
                             parentContent.style.maxHeight = parentContent.scrollHeight + "px";
-                        }, 50);
+                        }, 50); // 短暂延迟，确保渲染完成
                     }
 
                 } catch (error) {

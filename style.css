@@ -78,7 +78,7 @@ h1 {
 
 /* #updates-container > .accordion-content 定位年份的accordion-content */
 #updates-container > .accordion-content {
-    min-height: 360px; /* 设置一个最小高度，确保内容可见 */
+    min-height: 1000px; /* 设置一个最小高度，确保内容可见 */
 }
 
 /* 当折叠头被激活时，展开内容 */

@@ -6,7 +6,7 @@
 
     <link rel="icon" type="image/png" sizes="16x16" href="/img/favicon-16x16.png">
     <link rel="icon" type="image/png" sizes="32x32" href="/img/favicon-32x32.png">
-    <link rel="icon" type="image/x-icon" href="/img/favicon.ico">
+    <link rel="icon" type="x-icon" href="/img/favicon.ico">
 
     <link rel="apple-touch-icon" href="/img/apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="192x192" href="/img/android-chrome-192x192.png">
@@ -22,7 +22,7 @@
 <body>
     <h1>Biology arXiv Updates daily</h1>
 
-    <p>Welcome to the Biology arXiv pages! This site daily crawls arXiv (primarily Biology). <br > and generates summaries for each paper, helping you stay updated on the latest information in Biology and Computer Science.</p>
+    <p>Welcome to the Biology arXiv pages! This site daily crawls arXiv (primarily Biology) and generates summaries for each paper, helping you stay updated on the latest information in Biology and Computer Science.</p>
     <p>Please note that the content may be delayed.</p>
     <p>Provide feedback on <a href="https://github.com/yukari502/yukari502.github.io">GitHub</a>.</p>
 
@@ -38,6 +38,7 @@
             const updatesContainer = document.getElementById('updates-container');
 
             // Helper function to update maxHeight for an accordion content element
+            // This function will be called when an element needs to be expanded.
             function updateAccordionHeight(contentElement) {
                 if (contentElement) {
                     contentElement.style.maxHeight = contentElement.scrollHeight + "px";
@@ -173,12 +174,20 @@
                         this.classList.toggle('active');
 
                         if (content.style.maxHeight) {
-                            content.style.maxHeight = null; // 折叠
+                            content.style.maxHeight = null; // Collapse
+                            // When collapsing, also collapse all active children
+                            content.querySelectorAll('.accordion-header.active').forEach(childHeader => {
+                                childHeader.classList.remove('active');
+                                const childContent = document.getElementById(childHeader.getAttribute('data-target'));
+                                if (childContent) {
+                                    childContent.style.maxHeight = null;
+                                }
+                            });
                         } else {
-                            // 展开时，计算并设置实际内容高度
-                            updateAccordionHeight(content); // Update current content's height
+                            // Expand: set maxHeight to scrollHeight
+                            updateAccordionHeight(content); //
 
-                            // 如果是日期标题，且有data-path属性，加载内容
+                            // If it's a date header, and has data-path attribute, load content
                             if (this.classList.contains('date-header')) {
                                 const path = this.getAttribute('data-path');
                                 const fileId = targetId.replace('date-', '');
@@ -190,14 +199,25 @@
                                 }
                             }
 
-                            // 触发父级 accordion-content 的高度重新计算
-                            let currentParent = content.closest('.accordion-content');
-                            while (currentParent) {
-                                // Short delay to allow DOM to settle after child elements change
-                                setTimeout(() => {
-                                    updateAccordionHeight(currentParent);
-                                }, 50); // Small delay to allow DOM to render and scrollHeight to be accurate
-                                currentParent = currentParent.closest('.accordion-content'); // Move to the next parent
+                            // Optional: Close other expanded siblings at the same level
+                            // This might be desired for a cleaner UI, but can be removed if multiple open are allowed.
+                            // However, be cautious with this if year/month min-height is critical.
+                            // let siblingHeaders = this.parentNode.querySelectorAll(':scope > .accordion-header.active');
+                            // siblingHeaders.forEach(siblingHeader => {
+                            //     if (siblingHeader !== this) {
+                            //         siblingHeader.classList.remove('active');
+                            //         const siblingContent = document.getElementById(siblingHeader.getAttribute('data-target'));
+                            //         if (siblingContent) {
+                            //             siblingContent.style.maxHeight = null;
+                            //         }
+                            //     }
+                            // });
+
+                            // Immediately update parent heights after expansion
+                            let currentParent = this.parentNode.closest('.accordion-content');
+                            while(currentParent) {
+                                updateAccordionHeight(currentParent);
+                                currentParent = currentParent.parentNode.closest('.accordion-content');
                             }
                         }
                     });
@@ -216,21 +236,24 @@
                     const markdown = await response.text();
                     container.innerHTML = marked.parse(markdown);
 
-                    // Content is loaded, now update all parent accordion heights
-                    let currentElement = container;
-                    while (currentElement) {
-                        // Find the closest accordion-content parent
-                        const parentAccordion = currentElement.closest('.accordion-content');
-                        if (parentAccordion) {
-                             // Use setTimeout to ensure DOM has rendered
-                            setTimeout(() => {
-                                updateAccordionHeight(parentAccordion);
-                            }, 50);
-                            currentElement = parentAccordion; // Move up to the parent
-                        } else {
-                            currentElement = null; // No more accordion-content parents
-                        }
+                    // After content is loaded and rendered, update the height of this container
+                    // and its immediate parent if it's an accordion content.
+                    updateAccordionHeight(container); // Update the date's content height
+
+                    let parentContent = container.closest('.accordion-content');
+                    if (parentContent) {
+                        // This timeout ensures DOM has rendered.
+                        // It's crucial here because markdown rendering can change scrollHeight.
+                        setTimeout(() => {
+                            updateAccordionHeight(parentContent);
+                            // Also update any grandparent accordion content if necessary (e.g., month's parent year)
+                            let grandparentContent = parentContent.closest('.accordion-content');
+                            if (grandparentContent) {
+                                updateAccordionHeight(grandparentContent);
+                            }
+                        }, 50); // Small delay to allow DOM to render
                     }
+
 
                 } catch (error) {
                     console.error('Error loading markdown:', error);

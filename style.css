@@ -143,7 +143,7 @@ a:hover {
 
 /* 针对年份的accordion-content，设置一个最小高度 */
 #updates-container > .accordion-content {
-    min-height: 400px; /* 保持之前的最小高度，确保可以容纳12个月 */
+    min-height: 0px; /* 保持之前的最小高度，确保可以容纳12个月 */
     border-radius: 0 0 10px 10px; /* 配合年份头部的大圆角 */
 }
 

@@ -7,23 +7,20 @@ import datetime # 导入 datetime 模块用于日期处理
 import dotenv
 import argparse # 虽然大部分参数被自动化，但保留 argparse 便于未来扩展或调试
 
-import langchain_core.exceptions
-from langchain_google_generativeai import ChatGoogleGenerativeAI
-from langchain.prompts import (
-  ChatPromptTemplate,
-  SystemMessagePromptTemplate,
-  HumanMessagePromptTemplate,
-)
+import google.generativeai as genai
+from google.generativeai.types import GenerationConfig
+from pydantic import ValidationError # For validating structured output
 from structure import Structure # 确保您的 structure.py 文件存在并定义了 Structure 类
 
-# 加载环境变量 (例如 GOOGLE_API_KEY, MODEL_NAME, LANGUAGE)
-if os.path.exists('.env'):
-    dotenv.load_dotenv()
+# 获取当前脚本的绝对路径
+script_dir = os.path.dirname(os.path.abspath(__file__))
 
-# 从文件中读取系统提示和用户提示模板
-# 请确保 template.txt 和 system.txt 位于脚本的同一目录下
-template = open("template.txt", "r", encoding="utf-8").read()
-system = open("system.txt", "r", encoding="utf-8").read()
+# 加载环境变量 (例如 GOOGLE_API_KEY, MODEL_NAME, LANGUAGE)
+# 确保 .env 文件位于脚本的同一目录下
+dotenv_path = os.path.join(script_dir, ".env")
+if os.path.exists(dotenv_path):
+    dotenv.load_dotenv(dotenv_path)
+
 
 def get_current_month_file_paths(language: str):
     """
@@ -36,8 +33,6 @@ def get_current_month_file_paths(language: str):
     month_str = current_date.strftime("%Y-%m")
     
     # 构建月文件夹路径：假设脚本在某个子目录，要访问上级目录的 month 文件夹
-    # 获取当前脚本的绝对路径
-    script_dir = os.path.dirname(os.path.abspath(__file__))
     # 构建到上级目录的 'month' 文件夹的路径
     month_folder_path = os.path.join(script_dir, '..', 'month')
     # 确保 month 文件夹存在
@@ -81,21 +76,37 @@ def main():
         print(f"错误：解码 JSON 文件失败: {input_filepath} - {e}", file=sys.stderr)
         sys.exit(1)
 
-    # 实例化 ChatGoogleGenerativeAI 并应用结构化输出
-    # 确保 GOOGLE_API_KEY 环境变量已设置
-    llm = ChatGoogleGenerativeAI(model=model_name).with_structured_output(Structure)
-    print(f'已连接到模型: {model_name}', file=sys.stderr)
+    # 配置 Gemini API 密钥
+    try:
+        genai.configure(api_key=os.environ.get("GOOGLE_API_KEY"))
+        model = genai.GenerativeModel(model_name)
+        print(f'已成功初始化 Gemini 模型: {model_name}', file=sys.stderr)
+    except Exception as e:
+        print(f"错误：初始化 Gemini 模型失败: {e}", file=sys.stderr)
+        sys.exit(1)
 
-    # --- 修改点 3：更新提示模板以适应类别总结 ---
-    # `system` 和 `template` 文件的内容需要适配新的任务
-    # system.txt 建议内容: "你是一个专业的学术文章总结助手，擅长从多个文章中提取核心信息并进行结构化总结。"
-    # template.txt 建议内容: "请总结以下【{category_name}】类别的所有文章内容。请确保你的总结是客观、全面，并按照指定的结构化格式输出。所有文章的详细内容如下：\n{all_articles_content}"
-    prompt_template = ChatPromptTemplate.from_messages([
-        SystemMessagePromptTemplate.from_template(system),
-        HumanMessagePromptTemplate.from_template(template=template)
-    ])
+    # 定义系统提示和用户提示模板 (内联，不再从文件读取)
+    system_prompt = """你是一个专业的学术分析师。我将为你提供一系列从不同门类抓取到的学术文章数据。你的任务是深入阅读这些文章，并根据我提供的结构化输出要求，对这些文章进行全面的总结和趋势分析。"""
 
-    chain = prompt_template | llm
+    user_template = """请根据以下【{category_name}】类别下所有文章的TLDR、动机、结果和结论，生成一份全面、客观、结构化的总结。你需要对这个类别整体进行概括，而不是单独总结每篇文章。请确保你的总结是全面的，并严格按照以下 JSON 格式输出，不要包含任何额外文本或解释：
+
+```json
+{{
+    "category_name": "{category_name}",
+    "tldr": "文章集合的精简总结",
+    "motivation": "文章集合背后的核心动机或要解决的问题",
+    "method": "文章集合中主要研究方法或技术",
+    "result": "文章集合中主要研究成果或发现",
+    "conclusion": "文章集合的整体结论或影响",
+    "overall_summary": "该类别的整体概述，包括其主要研究领域和特点",
+    "key_themes": ["该类别中反复出现的主要研究主题或关键词"],
+    "current_hotspots": ["该类别目前研究最活跃、关注度最高的话题或技术"],
+    "future_trends": ["该类别未来可能的发展方向、新兴领域或研究范式"]
+}}
+```
+
+所有文章的详细内容如下：
+{all_articles_content}"""
 
     all_category_summaries = {} # 用于存储所有类别的总结结果
     
@@ -123,28 +134,65 @@ def main():
                 "--------------------\n" # 文章间的分隔符
             )
         
+        # 构建完整的提示
+        full_prompt = f"{system_prompt}\n\n{user_template.format(category_name=category_name, all_articles_content=all_articles_content)}"
+        print(f"模型输入 (full_prompt):\n{full_prompt}\n", file=sys.stderr) # 打印模型输入
+
         try:
-            # 调用链来生成总结
-            response: Structure = chain.invoke({
-                "language": language, # 传递语言参数
-                "category_name": category_name, # 传递类别名称
-                "all_articles_content": all_articles_content # 传递拼接后的所有文章内容
-            })
-            # 将结构化输出转换为字典并存储
-            all_category_summaries[category_name] = response.model_dump()
-        except langchain_core.exceptions.OutputParserException as e:
-            # 处理模型输出解析错误
-            print(f"类别 {category_name} 出现错误: {e}", file=sys.stderr)
+            # 调用 Gemini 模型
+            gemini_response = model.generate_content(
+                full_prompt,
+                generation_config=GenerationConfig(response_mime_type="application/json") # 明确要求 JSON 输出
+            )
+            
+            # 尝试解析 JSON 响应
+            response_text = gemini_response.text
+            print(f"模型原始输出 (gemini_response.text):\n{response_text}\n", file=sys.stderr) # 打印模型原始输出
+
+            # 移除 markdown code block fences if present
+            if response_text.startswith("```json") and response_text.endswith("```"):
+                json_content = response_text[len("```json"):-len("```")].strip()
+            else:
+                json_content = response_text.strip()
+
+            parsed_response = json.loads(json_content)
+            
+            # 使用 Pydantic 验证结构
+            validated_response = Structure(**parsed_response)
+            
+            print(f"模型结构化输出 (validated_response):\n{validated_response.model_dump_json(indent=2)}\n", file=sys.stderr) # 打印模型结构化输出
+            
+            all_category_summaries[category_name] = validated_response.model_dump()
+
+        except json.JSONDecodeError as e:
+            print(f"类别 {category_name} 出现 JSON 解析错误: {e}", file=sys.stderr)
             all_category_summaries[category_name] = {
                  "tldr": "Error",
                  "motivation": "Error",
                  "method": "Error",
                  "result": "Error",
                  "conclusion": "Error",
-                 "error_message": str(e) # 记录错误信息
+                 "overall_summary": "Error",
+                 "key_themes": [],
+                 "current_hotspots": [],
+                 "future_trends": [],
+                 "error_message": f"JSON Decode Error: {str(e)}"
+            }
+        except ValidationError as e:
+            print(f"类别 {category_name} 出现 Pydantic 验证错误: {e}", file=sys.stderr)
+            all_category_summaries[category_name] = {
+                 "tldr": "Error",
+                 "motivation": "Error",
+                 "method": "Error",
+                 "result": "Error",
+                 "conclusion": "Error",
+                 "overall_summary": "Error",
+                 "key_themes": [],
+                 "current_hotspots": [],
+                 "future_trends": [],
+                 "error_message": f"Pydantic Validation Error: {str(e)}"
             }
         except Exception as e:
-            # 捕获其他可能的错误，例如 API 错误
             print(f"类别 {category_name} 发生未知错误: {e}", file=sys.stderr)
             all_category_summaries[category_name] = {
                  "tldr": "Error",
@@ -152,6 +200,10 @@ def main():
                  "method": "Error",
                  "result": "Error",
                  "conclusion": "Error",
+                 "overall_summary": "Error",
+                 "key_themes": [],
+                 "current_hotspots": [],
+                 "future_trends": [],
                  "error_message": f"General Error: {str(e)}"
             }
         
@@ -169,4 +221,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-

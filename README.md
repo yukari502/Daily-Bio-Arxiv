@@ -1,6 +1,5 @@
 # About
-This is a forked and modified repo
-The orginal repo: https://github.com/dw-dengwei/daily-arXiv-ai-enhanced
+This is a forked and modified repo form。daily-arXiv-ai-enhanced
 
 This tool will daily crawl https://arxiv.org and use LLMs to summarize them then show them in github pages.
 

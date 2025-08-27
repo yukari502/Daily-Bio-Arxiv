@@ -1,26 +1,57 @@
-# About
-This is a forked and modified repo form。daily-arXiv-ai-enhanced
+# Daily arXiv AI Summarizer
 
-This tool will daily crawl https://arxiv.org and use LLMs to summarize them then show them in github pages.
+## About
 
-# What this repo can do 
-This repo will daily crawl arXiv papers mainly about **biology** (optional) and use **DeepSeek chat** (optional) to summarize the papers in **Chinese**. (Other language optional)
+This project is a fork of the [daily-arXiv-ai-enhanced](https://github.com/Starlento/daily-arXiv-ai-enhanced) tool. It automatically fetches new papers from arXiv.org, uses a Large Language Model (LLM) to summarize them, and publishes the summaries to a GitHub Pages website.
 
-If you wish to crawl other arXiv categories, use other LLMs or other language, please follow the bellow instructions.
-Otherwise, you can directly use this repo. 
+---
 
-### Instructions:
-1. Fork/modify this repo to your own account
-2. Go to: your-own-repo -> Settings -> Secrets and variables -> Actions
-3. Go to Secrets. Secrets are encrypted and are used for sensitive data
-   Create two repository secrets named `OPENAI_API_KEY` and `OPENAI_BASE_URL`, and input corresponding values.
-4. Go to Variables. Variables are shown as plain text and are used for non-sensitive data. Create the following repository variables:
-   1. `CATEGORIES`: separate the categories with ",", such as "q-bio.GN,cs.CV"
-   2. `LANGUAGE`: such as "Chinese","English",or other Language you perfer.(comperhensived by AI)
-   3. `MODEL_NAME`: such as "deepseek-chat"
-   4. `EMAIL`: your email for push to github
-   5. `NAME`: your name for push to github
-5. Go to your-own-repo -> Actions -> arXiv-daily
-6. You can manually click **Run workflow** to test if it works well. By default, this action will automatically run every day(16:30 UTC, Cos using deepseek api will be cheapper during this period). \
-Otherwise You can modify it in `.github/workflows/run.yml`
-7. You can modify the index.html to change the web as you want.
+## Features
+
+-   **Daily Updates**: Automatically crawls arXiv daily for new papers in your chosen categories (e.g., biology, computer science).
+-   **AI-Powered Summaries**: Utilizes an LLM of your choice (e.g., DeepSeek Chat) to generate concise summaries.
+-   **Customizable**: Easily configure the arXiv categories, LLM, and summary language to fit your needs.
+-   **Automated Deployment**: Publishes the summaries to a clean web interface hosted on GitHub Pages.
+
+---
+
+## Getting Started
+
+### 1. Fork the Repository
+
+First, fork this repository to your own GitHub account.
+
+### 2. Configure Secrets and Variables
+
+Navigate to `Settings` > `Secrets and variables` > `Actions` in your forked repository.
+
+#### Repository secrets
+
+Create the following encrypted secrets:
+
+-   `OPENAI_API_KEY`: Your API key for the LLM service.
+-   `OPENAI_BASE_URL`: The base URL for the LLM service's API endpoint.
+
+#### Repository variables
+
+Create the following variables:
+
+-   `CATEGORIES`: A comma-separated list of arXiv categories to track (e.g., `q-bio.GN,cs.CV`).
+-   `LANGUAGE`: The target language for the summaries (e.g., `Chinese`, `English`).
+-   `MODEL_NAME`: The identifier for the LLM you want to use (e.g., `deepseek-chat`).
+-   `EMAIL`: The email address to use for Git commits.
+-   `NAME`: The name to use for Git commits.
+
+### 3. Run the GitHub Action
+
+Navigate to the `Actions` tab in your repository and select the **arXiv-daily** workflow.
+
+-   **Manual Run**: You can click `Run workflow` to manually trigger the process and test your configuration.
+-   **Scheduled Run**: By default, the action is scheduled to run automatically at 16:30 UTC every day. You can customize the schedule by editing the cron job in `.github/workflows/run.yml`.
+    > **Note**: The default time is set to coincide with typically lower API costs for some services.
+
+---
+
+## Customization
+
+To change the appearance of the web page, you can modify the `index.html` file.

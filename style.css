@@ -17,13 +17,6 @@ h1 {
     letter-spacing: 0.5px;
 }
 
-h2 {
-    color: #34495e;
-    margin-top: 25px;
-    margin-bottom: 10px;
-    font-weight: 600;
-}
-
 p {
     margin-bottom: 15px;
     color: #555;
@@ -40,61 +33,166 @@ a:hover {
     text-decoration: underline;
 }
 
-ul {
-    list-style-type: none;
-    padding: 0;
-}
+/* --- 新的导航样式 --- */
 
-li {
-    margin-bottom: 10px;
-}
-
-#navigation-container {
+/* 地址栏/面包屑导航 */
+.breadcrumb-nav {
+    padding: 15px 20px;
     background-color: #ffffff;
-    padding: 15px 25px;
     border-radius: 8px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
-    margin-bottom: 20px;
-}
-
-#nav-path {
-    font-family: 'Courier New', Courier, monospace;
+    margin-bottom: 25px;
     font-size: 1.1em;
-    color: #555;
+    border: 1px solid #e0e0e0;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
 }
 
-#nav-path a {
-    color: #34495e;
-    font-weight: bold;
+.breadcrumb-nav a.breadcrumb-item {
+    color: #3498db;
+    font-weight: 500;
 }
 
-#nav-path a:hover {
-    color: #2c3e50;
-    text-decoration: none;
+.breadcrumb-nav a.breadcrumb-item:hover {
+    color: #2980b9;
 }
 
-#updates-container {
-    padding: 20px;
-    background-color: #ffffff;
+.breadcrumb-nav span {
+    color: #555; /* 当前页面的文本颜色 */
+    font-weight: 500;
+}
+
+/* 导航项目列表容器 */
+.item-list-container {
+    display: grid;
+    /* 响应式网格布局 */
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 20px;
+}
+
+/* 每个可点击项目的基本样式 */
+.list-item {
+    color: #333;
+    cursor: pointer;
+    padding: 25px 20px;
     border-radius: 8px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.07);
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+    text-align: center;
+    font-size: 1.2em;
+    font-weight: 600;
+    border: 1px solid #e9ecef;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
-.loading, .error {
+.list-item:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 5px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* "文件夹" 样式 (年, 月) */
+.folder-item {
+    background-color: #f0f8ff; /* AliceBlue */
+    color: #34495e;
+}
+
+.folder-item::before {
+    content: '📁';
+    margin-right: 12px;
+    font-size: 1.3em;
+    vertical-align: middle;
+}
+
+/* "文件" 样式 (日) */
+.file-item {
+    background-color: #ffffff;
+    font-family: 'Courier New', Courier, monospace; /* 日期使用等宽字体更美观 */
+    font-size: 1.1em;
+}
+
+.file-item::before {
+    content: '📄';
+    margin-right: 12px;
+    font-size: 1.3em;
+    vertical-align: middle;
+}
+
+/* 内容显示区域 */
+#content-display {
+    background-color: #ffffff;
+    padding: 20px 30px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    border: 1px solid #ddd;
+    margin-top: 20px;
+}
+
+/* --- 通用及内容样式 (大部分保留自原版) --- */
+
+.loading {
     text-align: center;
     padding: 30px;
     font-style: italic;
-}
-
-.loading {
     color: #777;
     font-size: 1.1em;
 }
 
 .error {
     color: #e74c3c;
+    padding: 15px;
     background-color: #fdedec;
     border-radius: 8px;
     margin: 20px 0;
     border: 1px solid #e74c3c;
+}
+
+.markdown-content {
+    padding-top: 10px;
+}
+
+.markdown-content h1,
+.markdown-content h2,
+.markdown-content h3 {
+    color: #34495e;
+    margin-top: 25px;
+    margin-bottom: 10px;
+    font-weight: 600;
+    border-bottom: 2px solid #ecf0f1;
+    padding-bottom: 5px;
+}
+
+.markdown-content p {
+    margin-bottom: 10px;
+}
+
+.markdown-content ul {
+    list-style-type: disc;
+    margin-left: 20px;
+    padding-left: 0;
+}
+
+.markdown-content li {
+    margin-bottom: 5px;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+    body {
+        padding: 15px;
+    }
+
+    h1 {
+        font-size: 2em;
+        margin-bottom: 30px;
+    }
+
+    .item-list-container {
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: 15px;
+    }
+
+    .list-item {
+        padding: 20px 15px;
+        font-size: 1.1em;
+    }
 }

@@ -26,10 +26,6 @@
     <p>Please note that the content may be delayed.</p>
     <p>Provide feedback on <a href="https://github.com/yukari502/yukari502.github.io">GitHub</a>.</p>
 
-    <div id="navigation-container">
-        <span id="nav-path"></span>
-    </div>
-
     <div id="updates-container">
         <div class="loading">少女祈禱中.....</div>
     </div>
@@ -38,138 +34,176 @@
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const updatesContainer = document.getElementById('updates-container');
-            const navPathContainer = document.getElementById('nav-path');
-            const baseUrl = window.location.origin;
+            let allData = null; // 存储所有从JSON加载的数据
+            let currentState = {}; // 跟踪当前的视图状态 {level, year, month, path, dateStr}
 
-            function renderPath(pathSegments) {
-                navPathContainer.innerHTML = ''; // Clear previous navigation
-                let pathHtml = '';
-                let currentPath = baseUrl;
+            const monthNames = [
+                "January", "February", "March", "April", "May", "June",
+                "July", "August", "September", "October", "November", "December"
+            ];
 
-                pathSegments.forEach((segment, index) => {
-                    currentPath += `/${segment}`;
-                    if (index < pathSegments.length - 1) {
-                        pathHtml += `<a href="${currentPath}">${segment}</a> / `;
-                    } else {
-                        pathHtml += `<span>${segment}</span>`;
-                    }
-                });
-                navPathContainer.innerHTML = pathHtml;
-            }
-
-            async function loadContent() {
+            // 1. 从静态JSON文件获取更新列表
+            async function fetchUpdates() {
                 try {
-                    const path = window.location.pathname;
-                    // If the path is just /, load the year list
-                    if (path === '/' || path.endsWith('/index.html')) {
-                        const response = await fetch('data/index.json');
-                        if (!response.ok) {
-                            throw new Error('无法获取更新文件列表,請刷新重试。');
-                        }
-                        const data = await response.json();
-                        renderYearList(data.filesByYear);
-                        renderPath(['yukari502.github.io']);
+                    const response = await fetch('data/index.json');
+                    if (!response.ok) {
+                        throw new Error('无法获取更新文件列表, 請刷新重试。');
+                    }
+                    allData = await response.json();
+
+                    if (!allData.filesByYear || Object.keys(allData.filesByYear).length === 0) {
+                        updatesContainer.innerHTML = '<div class="error">暂无更新内容</div>';
                         return;
                     }
+                    
+                    // 初始化应用，显示年份列表
+                    navigateTo({ level: 'years' });
+                } catch (error) {
+                    console.error('Error fetching updates:', error);
+                    updatesContainer.innerHTML = `<div class="error">加载更新内容失败: ${error.message}</div>`;
+                }
+            }
+            
+            // 2. 导航和状态管理
+            function navigateTo(state) {
+                currentState = state;
+                renderCurrentView();
+            }
 
-                    // Otherwise, load the specific content
-                    const pathSegments = path.split('/').filter(Boolean); // Split path and remove empty strings
-                    const [year, month, file] = pathSegments;
+            // 3. 核心渲染函数：根据当前状态决定显示什么
+            function renderCurrentView() {
+                const { level } = currentState;
 
-                    if (file && file.endsWith('.md')) {
-                        // Load and render a specific Markdown file
-                        const mdPath = `data/${pathSegments.join('/')}`;
-                        const response = await fetch(mdPath);
-                        if (!response.ok) {
-                            throw new Error('无法加载内容。');
-                        }
-                        const markdown = await response.text();
-                        updatesContainer.innerHTML = marked.parse(markdown);
-                        renderPath(pathSegments);
-                    } else if (month) {
-                        // Load and render month view
-                        const response = await fetch(`data/${year}/index.json`);
-                        if (!response.ok) {
-                            throw new Error('无法获取月份列表。');
-                        }
-                        const data = await response.json();
-                        renderMonthView(data.filesByMonth, month);
-                        renderPath([year, month]);
-                    } else if (year) {
-                        // Load and render year view
-                        const response = await fetch(`data/index.json`);
-                        if (!response.ok) {
-                            throw new Error('无法获取年份列表。');
-                        }
-                        const data = await data.json();
-                        renderYearView(data.filesByYear, year);
-                        renderPath([year]);
+                if (level === 'content') {
+                    renderContentView();
+                } else {
+                    renderListView();
+                }
+                attachEventListeners();
+            }
+
+            // 4. 渲染列表视图（年、月、日）
+            function renderListView() {
+                const { level, year, month } = currentState;
+                let listHtml = '';
+                
+                if (level === 'years') {
+                    listHtml = renderYearList(allData.filesByYear);
+                } else if (level === 'months') {
+                    listHtml = renderMonthList(allData.filesByYear, year);
+                } else if (level === 'days') {
+                    listHtml = renderDayList(allData.filesByYear, year, month);
+                }
+
+                updatesContainer.innerHTML = `
+                    ${renderBreadcrumbs()}
+                    <div class="item-list-container">${listHtml}</div>
+                `;
+            }
+            
+            // 5. 渲染最终的内容视图
+            async function renderContentView() {
+                updatesContainer.innerHTML = `
+                    ${renderBreadcrumbs()}
+                    <div id="content-display">
+                        <div class="loading">少女祈禱中.....</div>
+                    </div>
+                `;
+
+                try {
+                    const response = await fetch(currentState.path);
+                    if (!response.ok) throw new Error('无法加载内容');
+                    const markdown = await response.text();
+                    const contentDiv = document.getElementById('content-display');
+                    if (contentDiv) {
+                        contentDiv.innerHTML = `<div class="markdown-content">${marked.parse(markdown)}</div>`;
                     }
                 } catch (error) {
-                    console.error('Error loading content:', error);
-                    updatesContainer.innerHTML = `<div class="error">加载内容失败: ${error.message}</div>`;
+                    const contentDiv = document.getElementById('content-display');
+                    if(contentDiv) {
+                       contentDiv.innerHTML = `<div class="error">加载内容失败: ${error.message}</div>`;
+                    }
                 }
+            }
+
+            // 6. 各级别列表的HTML生成器
+            function renderBreadcrumbs() {
+                const { level, year, month, dateStr } = currentState;
+                let crumbs = `<a href="#" class="breadcrumb-item" data-level="years">Home</a>`;
+
+                if (year) {
+                    crumbs += ` / <a href="#" class="breadcrumb-item" data-level="months" data-year="${year}">${year}</a>`;
+                }
+                if (month !== undefined && month !== null) {
+                    crumbs += ` / <a href="#" class="breadcrumb-item" data-level="days" data-year="${year}" data-month="${month}">${monthNames[month]}</a>`;
+                }
+                if (level === 'content' && dateStr) {
+                    crumbs += ` / <span>${dateStr}</span>`; // 当前页面，不可点击
+                }
+                return `<nav class="breadcrumb-nav">${crumbs}</nav>`;
             }
 
             function renderYearList(filesByYear) {
-                let html = '<h2>Years</h2><ul>';
                 const years = Object.keys(filesByYear).sort((a, b) => b - a);
-                years.forEach(year => {
-                    html += `<li><a href="${baseUrl}/${year}">${year}</a></li>`;
-                });
-                html += '</ul>';
-                updatesContainer.innerHTML = html;
+                return years.map(year => `
+                    <div class="list-item folder-item" data-level="months" data-year="${year}">
+                        ${year}
+                    </div>
+                `).join('');
             }
 
-            function renderYearView(filesByYear, year) {
+            function renderMonthList(filesByYear, year) {
                 const files = filesByYear[year];
-                if (!files) {
-                    updatesContainer.innerHTML = `<div class="error">No updates found for ${year}.</div>`;
-                    return;
-                }
-                const filesByMonth = files.reduce((acc, file) => {
-                    const month = new Date(file.date).getMonth();
-                    const monthName = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"][month];
-                    if (!acc[monthName]) {
-                        acc[monthName] = [];
+                const months = [...new Set(files.map(file => new Date(file.date).getMonth()))]
+                    .sort((a, b) => b - a);
+                return months.map(monthIndex => `
+                    <div class="list-item folder-item" data-level="days" data-year="${year}" data-month="${monthIndex}">
+                        ${monthNames[monthIndex]}
+                    </div>
+                `).join('');
+            }
+
+            function renderDayList(filesByYear, year, month) {
+                const filesForMonth = filesByYear[year]
+                    .filter(file => new Date(file.date).getMonth() == month)
+                    .sort((a, b) => new Date(b.date) - new Date(a.date));
+                return filesForMonth.map(file => `
+                    <div class="list-item file-item" data-path="${file.path}" data-date-str="${file.date}">
+                        ${file.date}
+                    </div>
+                `).join('');
+            }
+
+            // 7. 事件监听器
+            function attachEventListeners() {
+                updatesContainer.addEventListener('click', function(e) {
+                    const target = e.target.closest('.list-item, .breadcrumb-item');
+                    if (!target) return;
+                    e.preventDefault();
+
+                    if (target.classList.contains('file-item')) {
+                        const { path, dateStr } = target.dataset;
+                        const date = new Date(dateStr);
+                        navigateTo({
+                            level: 'content',
+                            year: date.getFullYear(),
+                            month: date.getMonth(),
+                            path: path,
+                            dateStr: dateStr
+                        });
+                    } else {
+                        const { level, year, month } = target.dataset;
+                        navigateTo({
+                            level: level,
+                            year: year,
+                            month: month
+                        });
                     }
-                    acc[monthName].push(file);
-                    return acc;
-                }, {});
-
-                let html = `<h2>${year}</h2><ul>`;
-                const sortedMonths = Object.keys(filesByMonth).sort((a, b) => {
-                    const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-                    return months.indexOf(b) - months.indexOf(a);
-                });
-                sortedMonths.forEach(month => {
-                    html += `<li><a href="${baseUrl}/${year}/${month}">${month}</a></li>`;
-                });
-                html += '</ul>';
-                updatesContainer.innerHTML = html;
+                }, { once: true }); // 使用once确保每次渲染后只绑定一次事件
             }
 
-            function renderMonthView(filesByMonth, month) {
-                const files = filesByMonth[month];
-                if (!files) {
-                    updatesContainer.innerHTML = `<div class="error">No updates found for ${month}.</div>`;
-                    return;
-                }
-                let html = `<h2>${month}</h2><ul>`;
-                files.sort((a, b) => new Date(b.date) - new Date(a.date));
-                files.forEach(file => {
-                    const dateStr = file.date;
-                    html += `<li><a href="${baseUrl}/${file.path}">${dateStr}</a></li>`;
-                });
-                html += '</ul>';
-                updatesContainer.innerHTML = html;
-            }
-
-            // Listen for changes in the URL hash or state to trigger content loading
-            window.addEventListener('popstate', loadContent);
-            
-            // Initial load
-            loadContent();
+            // 初始化
+            fetchUpdates();
         });
     </script>
 </body>

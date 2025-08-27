@@ -2,7 +2,7 @@
 
 ## About
 
-This project is a fork of the [daily-arXiv-ai-enhanced](https://github.com/Starlento/daily-arXiv-ai-enhanced) tool. It automatically fetches new papers from arXiv.org, uses a Large Language Model (LLM) to summarize them, and publishes the summaries to a GitHub Pages website.
+This project is a modified by [daily-arXiv-ai-enhanced](https://github.com/Starlento/daily-arXiv-ai-enhanced) tool. It automatically fetches new papers from arXiv.org, uses a Large Language Model (LLM) to summarize them, and publishes the summaries to a GitHub Pages website.
 
 ---
 

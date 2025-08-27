@@ -26,9 +26,11 @@
     <p>Please note that the content may be delayed.</p>
     <p>Provide feedback on <a href="https://github.com/yukari502/yukari502.github.io">GitHub</a>.</p>
 
+    <div id="navigation-container">
+        <span id="nav-path"></span>
+    </div>
 
-
- <div id="updates-container">
+    <div id="updates-container">
         <div class="loading">少女祈禱中.....</div>
     </div>
 
@@ -36,233 +38,138 @@
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const updatesContainer = document.getElementById('updates-container');
+            const navPathContainer = document.getElementById('nav-path');
+            const baseUrl = window.location.origin;
 
-            // Helper function to update maxHeight for an accordion content element
-            // This function will be called when an element needs to be expanded.
-            function updateAccordionHeight(contentElement) {
-                if (contentElement) {
-                    contentElement.style.maxHeight = contentElement.scrollHeight + "px";
-                }
+            function renderPath(pathSegments) {
+                navPathContainer.innerHTML = ''; // Clear previous navigation
+                let pathHtml = '';
+                let currentPath = baseUrl;
+
+                pathSegments.forEach((segment, index) => {
+                    currentPath += `/${segment}`;
+                    if (index < pathSegments.length - 1) {
+                        pathHtml += `<a href="${currentPath}">${segment}</a> / `;
+                    } else {
+                        pathHtml += `<span>${segment}</span>`;
+                    }
+                });
+                navPathContainer.innerHTML = pathHtml;
             }
 
-            // 从静态JSON文件获取更新列表
-            async function fetchUpdates() {
+            async function loadContent() {
                 try {
-                    // 使用相对路径获取静态JSON索引
-                    const response = await fetch('data/index.json');
-
-                    if (!response.ok) {
-                        throw new Error('无法获取更新文件列表,請刷新重试。');
-                    }
-
-                    const data = await response.json();
-
-                    if (!data.filesByYear || Object.keys(data.filesByYear).length === 0) {
-                        updatesContainer.innerHTML = '<div class="error">暂无更新内容</div>';
+                    const path = window.location.pathname;
+                    // If the path is just /, load the year list
+                    if (path === '/' || path.endsWith('/index.html')) {
+                        const response = await fetch('data/index.json');
+                        if (!response.ok) {
+                            throw new Error('无法获取更新文件列表,請刷新重试。');
+                        }
+                        const data = await response.json();
+                        renderYearList(data.filesByYear);
+                        renderPath(['yukari502.github.io']);
                         return;
                     }
 
-                    // 渲染UI
-                    renderUpdates(data.filesByYear);
+                    // Otherwise, load the specific content
+                    const pathSegments = path.split('/').filter(Boolean); // Split path and remove empty strings
+                    const [year, month, file] = pathSegments;
 
-                    // 添加事件监听器
-                    setupAccordion();
-
+                    if (file && file.endsWith('.md')) {
+                        // Load and render a specific Markdown file
+                        const mdPath = `data/${pathSegments.join('/')}`;
+                        const response = await fetch(mdPath);
+                        if (!response.ok) {
+                            throw new Error('无法加载内容。');
+                        }
+                        const markdown = await response.text();
+                        updatesContainer.innerHTML = marked.parse(markdown);
+                        renderPath(pathSegments);
+                    } else if (month) {
+                        // Load and render month view
+                        const response = await fetch(`data/${year}/index.json`);
+                        if (!response.ok) {
+                            throw new Error('无法获取月份列表。');
+                        }
+                        const data = await response.json();
+                        renderMonthView(data.filesByMonth, month);
+                        renderPath([year, month]);
+                    } else if (year) {
+                        // Load and render year view
+                        const response = await fetch(`data/index.json`);
+                        if (!response.ok) {
+                            throw new Error('无法获取年份列表。');
+                        }
+                        const data = await data.json();
+                        renderYearView(data.filesByYear, year);
+                        renderPath([year]);
+                    }
                 } catch (error) {
-                    console.error('Error fetching updates:', error);
-                    updatesContainer.innerHTML = `<div class="error">加载更新内容失败: ${error.message}</div>`;
+                    console.error('Error loading content:', error);
+                    updatesContainer.innerHTML = `<div class="error">加载内容失败: ${error.message}</div>`;
                 }
             }
 
-            // 渲染更新内容
-            function renderUpdates(filesByYear) {
-                let html = '';
-                const monthNames = [
-                    "January", "February", "March", "April", "May", "June",
-                    "July", "August", "September", "October", "November", "December"
-                ];
-
-                // 按年份降序排序
+            function renderYearList(filesByYear) {
+                let html = '<h2>Years</h2><ul>';
                 const years = Object.keys(filesByYear).sort((a, b) => b - a);
-
                 years.forEach(year => {
-                    const files = filesByYear[year];
-
-                    // Group files by month
-                    const filesByMonth = files.reduce((acc, file) => {
-                        const date = new Date(file.date);
-                        const month = date.getMonth(); // 0-indexed month
-                        const monthKey = `${year}-${month}`; // Unique key for month in a given year
-
-                        if (!acc[monthKey]) {
-                            acc[monthKey] = {
-                                name: monthNames[month],
-                                files: []
-                            };
-                        }
-                        acc[monthKey].files.push(file);
-                        return acc;
-                    }, {});
-
-                    // Sort months in descending order (e.g., December, November, ...)
-                    const sortedMonthKeys = Object.keys(filesByMonth).sort((a, b) => {
-                        const [, monthA] = a.split('-').map(Number);
-                        const [, monthB] = b.split('-').map(Number);
-                        return monthB - monthA;
-                    });
-
-
-                    // Add year header
-                    html += `
-                        <button class="accordion-header year-header" data-target="year-${year}">
-                            <h2>${year}</h2>
-                        </button>
-                        <div id="year-${year}" class="accordion-content">
-                    `;
-
-                    sortedMonthKeys.forEach(monthKey => {
-                        const monthData = filesByMonth[monthKey];
-                        const monthName = monthData.name;
-                        const monthFiles = monthData.files.sort((a, b) => new Date(b.date) - new Date(a.date)); // Sort files within the month by date descending
-
-                        // Add month header
-                        html += `
-                            <button class="accordion-header month-header" data-target="month-${monthKey}">
-                                <h3>${monthName}</h3>
-                            </button>
-                            <div id="month-${monthKey}" class="accordion-content">
-                        `;
-
-                        // Add daily files for the current month
-                        monthFiles.forEach(file => {
-                            const dateStr = file.date;
-                            const [year, month, day] = dateStr.split('-');
-                            const formattedDate = `${year}-${month}-${day}`;
-                            const fileId = dateStr.replace(/-/g, '');
-
-                            html += `
-                                <button class="accordion-header date-header" data-target="date-${fileId}" data-path="${file.path}">
-                                    <h4>${formattedDate}</h4>
-                                </button>
-                                <div id="date-${fileId}" class="accordion-content">
-                                    <div class="markdown-content" id="content-${fileId}">
-                                        <div class="loading">少女祈禱中.....</div>
-                                    </div>
-                                </div>
-                            `;
-                        });
-
-                        html += `</div>`; // Close month content
-                    });
-
-                    html += '</div>'; // Close year content
+                    html += `<li><a href="${baseUrl}/${year}">${year}</a></li>`;
                 });
-
+                html += '</ul>';
                 updatesContainer.innerHTML = html;
             }
 
-            // 设置折叠面板功能
-            function setupAccordion() {
-                const accHeaders = document.querySelectorAll('.accordion-header');
-
-                accHeaders.forEach(header => {
-                    header.addEventListener('click', function() {
-                        const targetId = this.getAttribute('data-target');
-                        const content = document.getElementById(targetId);
-
-                        // Toggle current accordion item's active state
-                        this.classList.toggle('active');
-
-                        if (content.style.maxHeight) {
-                            content.style.maxHeight = null; // Collapse
-                            // When collapsing, also collapse all active children
-                            content.querySelectorAll('.accordion-header.active').forEach(childHeader => {
-                                childHeader.classList.remove('active');
-                                const childContent = document.getElementById(childHeader.getAttribute('data-target'));
-                                if (childContent) {
-                                    childContent.style.maxHeight = null;
-                                }
-                            });
-                        } else {
-                            // Expand: set maxHeight to scrollHeight
-                            updateAccordionHeight(content); //
-
-                            // If it's a date header, and has data-path attribute, load content
-                            if (this.classList.contains('date-header')) {
-                                const path = this.getAttribute('data-path');
-                                const fileId = targetId.replace('date-', '');
-                                const contentDiv = document.getElementById(`content-${fileId}`);
-
-                                // If content hasn't been loaded yet (still shows loading message)
-                                if (contentDiv.querySelector('.loading')) {
-                                    loadMarkdownContent(path, contentDiv);
-                                }
-                            }
-
-                            // Optional: Close other expanded siblings at the same level
-                            // This might be desired for a cleaner UI, but can be removed if multiple open are allowed.
-                            // However, be cautious with this if year/month min-height is critical.
-                            // let siblingHeaders = this.parentNode.querySelectorAll(':scope > .accordion-header.active');
-                            // siblingHeaders.forEach(siblingHeader => {
-                            //     if (siblingHeader !== this) {
-                            //         siblingHeader.classList.remove('active');
-                            //         const siblingContent = document.getElementById(siblingHeader.getAttribute('data-target'));
-                            //         if (siblingContent) {
-                            //             siblingContent.style.maxHeight = null;
-                            //         }
-                            //     }
-                            // });
-
-                            // Immediately update parent heights after expansion
-                            let currentParent = this.parentNode.closest('.accordion-content');
-                            while(currentParent) {
-                                updateAccordionHeight(currentParent);
-                                currentParent = currentParent.parentNode.closest('.accordion-content');
-                            }
-                        }
-                    });
-                });
-            }
-
-            // 加载Markdown内容
-            async function loadMarkdownContent(path, container) {
-                try {
-                    const response = await fetch(path);
-
-                    if (!response.ok) {
-                        throw new Error('无法加载内容');
-                    }
-
-                    const markdown = await response.text();
-                    container.innerHTML = marked.parse(markdown);
-
-                    // After content is loaded and rendered, update the height of this container
-                    // and its immediate parent if it's an accordion content.
-                    updateAccordionHeight(container); // Update the date's content height
-
-                    let parentContent = container.closest('.accordion-content');
-                    if (parentContent) {
-                        // This timeout ensures DOM has rendered.
-                        // It's crucial here because markdown rendering can change scrollHeight.
-                        setTimeout(() => {
-                            updateAccordionHeight(parentContent);
-                            // Also update any grandparent accordion content if necessary (e.g., month's parent year)
-                            let grandparentContent = parentContent.closest('.accordion-content');
-                            if (grandparentContent) {
-                                updateAccordionHeight(grandparentContent);
-                            }
-                        }, 50); // Small delay to allow DOM to render
-                    }
-
-
-                } catch (error) {
-                    console.error('Error loading markdown:', error);
-                    container.innerHTML = `<div class="error">加载内容失败: ${error.message}</div>`;
+            function renderYearView(filesByYear, year) {
+                const files = filesByYear[year];
+                if (!files) {
+                    updatesContainer.innerHTML = `<div class="error">No updates found for ${year}.</div>`;
+                    return;
                 }
+                const filesByMonth = files.reduce((acc, file) => {
+                    const month = new Date(file.date).getMonth();
+                    const monthName = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"][month];
+                    if (!acc[monthName]) {
+                        acc[monthName] = [];
+                    }
+                    acc[monthName].push(file);
+                    return acc;
+                }, {});
+
+                let html = `<h2>${year}</h2><ul>`;
+                const sortedMonths = Object.keys(filesByMonth).sort((a, b) => {
+                    const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+                    return months.indexOf(b) - months.indexOf(a);
+                });
+                sortedMonths.forEach(month => {
+                    html += `<li><a href="${baseUrl}/${year}/${month}">${month}</a></li>`;
+                });
+                html += '</ul>';
+                updatesContainer.innerHTML = html;
             }
 
-            // 初始化
-            fetchUpdates();
+            function renderMonthView(filesByMonth, month) {
+                const files = filesByMonth[month];
+                if (!files) {
+                    updatesContainer.innerHTML = `<div class="error">No updates found for ${month}.</div>`;
+                    return;
+                }
+                let html = `<h2>${month}</h2><ul>`;
+                files.sort((a, b) => new Date(b.date) - new Date(a.date));
+                files.forEach(file => {
+                    const dateStr = file.date;
+                    html += `<li><a href="${baseUrl}/${file.path}">${dateStr}</a></li>`;
+                });
+                html += '</ul>';
+                updatesContainer.innerHTML = html;
+            }
+
+            // Listen for changes in the URL hash or state to trigger content loading
+            window.addEventListener('popstate', loadContent);
+            
+            // Initial load
+            loadContent();
         });
     </script>
 </body>

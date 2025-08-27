@@ -33,14 +33,16 @@ a:hover {
     text-decoration: underline;
 }
 
-/* --- 新功能: 快捷链接卡片样式 --- */
+/* --- 快捷链接卡片样式 --- */
 .quick-link-card {
-    display: block;
-    background-color: #3498db; /* 使用醒目的蓝色 */
+    display: flex; /* 改为flex布局以对齐箭头 */
+    justify-content: center;
+    align-items: center;
+    background-color: #3498db;
     color: #ffffff;
     padding: 20px 25px;
     border-radius: 8px;
-    margin-bottom: 30px; /* 与下方标题拉开距离 */
+    margin-bottom: 40px; /* 建议2: 增加下方间距 */
     font-size: 1.5em;
     font-weight: 700;
     text-align: center;
@@ -54,10 +56,9 @@ a:hover {
     transform: translateY(-3px);
     box-shadow: 0 6px 15px rgba(52, 152, 219, 0.5);
     color: #ffffff;
-    text-decoration: none;
 }
 
-/* --- 新功能: 历史索引标题样式 --- */
+/* --- 历史索引标题样式 --- */
 .history-title {
     color: #34495e;
     text-align: center;
@@ -67,15 +68,15 @@ a:hover {
     padding-bottom: 10px;
 }
 
-/* --- Breadcrumb Navigation (地址栏样式) --- */
+/* --- 地址栏样式 --- */
 .breadcrumb-nav {
-    background-color: #34495e; /* 深色背景 */
+    background-color: #34495e;
     color: #ffffff;
     padding: 15px 25px;
     border-radius: 8px;
     margin-bottom: 25px;
-    font-size: 1.2em; /* 放大字体 */
-    font-weight: 700; /* 加粗 */
+    font-size: 1.2em;
+    font-weight: 700;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
 }
 
@@ -90,15 +91,10 @@ a:hover {
     text-decoration: underline;
 }
 
-.breadcrumb-nav span {
-    color: #bdc3c7;
-}
-.breadcrumb-nav span.breadcrumb-current {
-    color: #ffffff;
-    font-weight: bold;
-}
+.breadcrumb-nav span { color: #bdc3c7; }
+.breadcrumb-nav span.breadcrumb-current { color: #ffffff; font-weight: bold; }
 
-/* --- Item Lists & Items (列表样式) --- */
+/* --- 列表及项目样式 --- */
 .item-list-container {
     display: flex;
     flex-direction: column;
@@ -113,11 +109,14 @@ a:hover {
 }
 
 .list-item {
+    display: flex; /* 使用flex布局对齐内容和箭头 */
+    justify-content: space-between; /* 内容居左，箭头居右 */
+    align-items: center;
     cursor: pointer;
     border-radius: 8px;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.07);
     transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
-    text-align: center;
+    padding: 15px 20px;
     font-weight: 700;
     border: 1px solid transparent;
 }
@@ -127,6 +126,27 @@ a:hover {
     box-shadow: 0 5px 12px rgba(0, 0, 0, 0.12);
 }
 
+/* 建议2: 增加点击反馈 */
+.list-item:active, .quick-link-card:active {
+    transform: translateY(1px);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+/* 建议2: 箭头样式 */
+.arrow {
+    margin-left: 15px;
+    font-size: 1.2em;
+    color: #bdc3c7;
+    transition: color 0.2s;
+}
+.list-item:hover .arrow {
+    color: #3498db;
+}
+.quick-link-card .arrow {
+    color: #ffffff;
+    opacity: 0.7;
+}
+
 .year-item {
     background-color: #34495e;
     color: #ffffff;
@@ -134,32 +154,24 @@ a:hover {
     padding: 25px 30px;
     margin-bottom: 10px;
 }
-.year-item:hover {
-    background-color: #4a667b;
-}
+.year-item:hover { background-color: #4a667b; }
+.year-item .arrow { color: #bdc3c7; }
+.year-item:hover .arrow { color: #ffffff; }
 
 .month-item {
     background-color: #ecf0f1;
     color: #2c3e50;
     font-size: 1.4em;
-    padding: 20px;
 }
-.month-item:hover {
-    background-color: #dbe4e6;
-    border-color: #bdc3c7;
-}
+.month-item:hover { background-color: #dbe4e6; border-color: #bdc3c7; }
 
 .day-item {
     background-color: #ffffff;
     color: #333;
     font-size: 1.1em;
-    padding: 15px;
     border-color: #e9ecef;
 }
-.day-item:hover {
-    background-color: #f8f9fa;
-    border-color: #ced4da;
-}
+.day-item:hover { background-color: #f8f9fa; border-color: #ced4da; }
 
 /* --- 内容显示区域 --- */
 #content-display {
@@ -171,19 +183,28 @@ a:hover {
     margin-top: 20px;
 }
 
-/* --- 通用及内容样式 --- */
-.loading, .error { /* ... */ }
-
-.markdown-content h1,
-.markdown-content h2,
-.markdown-content h3 {
-    color: #34495e;
-    margin-top: 25px;
-    margin-bottom: 10px;
-    font-weight: 600;
-    border-bottom: 2px solid #ecf0f1;
-    padding-bottom: 5px;
+/* 建议2: 优化内容页可读性 */
+.markdown-content blockquote {
+    border-left: 4px solid #3498db;
+    padding-left: 15px;
+    margin-left: 0;
+    color: #555;
+    font-style: italic;
 }
+.markdown-content pre {
+    background-color: #f6f8fa;
+    padding: 16px;
+    border-radius: 5px;
+    overflow: auto;
+}
+.markdown-content code {
+    font-family: 'Courier New', Courier, monospace;
+}
+
+/* ... 其他样式 ... */
+.loading { text-align: center; padding: 30px; font-style: italic; color: #777; font-size: 1.1em; }
+.error { color: #e74c3c; padding: 15px; background-color: #fdedec; border-radius: 8px; margin: 20px 0; border: 1px solid #e74c3c; }
+.markdown-content h1, .markdown-content h2, .markdown-content h3 { color: #34495e; margin-top: 25px; margin-bottom: 10px; font-weight: 600; border-bottom: 2px solid #ecf0f1; padding-bottom: 5px; }
 
 /* --- 响应式设计 --- */
 @media (max-width: 768px) {

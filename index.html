@@ -16,6 +16,7 @@
 
     <meta name="theme-color" content="#ffffff">
     
+    <!-- 已撤销缓存破坏机制 -->
     <link rel="stylesheet" href="style.css">
 
 </head>
@@ -26,6 +27,12 @@
     <p>Please note that the content may be delayed.</p>
     <p>Provide feedback on <a href="https://github.com/yukari502/yukari502.github.io">GitHub</a>.</p>
 
+    <!-- 新功能：快捷链接容器 -->
+    <div id="quick-links-container"></div>
+    
+    <!-- 新功能：历史索引标题 -->
+    <h2 class="history-title">Bio arXiv history index</h2>
+
     <div id="updates-container">
         <div class="loading">少女祈禱中.....</div>
     </div>
@@ -34,8 +41,9 @@
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const updatesContainer = document.getElementById('updates-container');
-            let allData = null; // 存储所有从JSON加载的数据
-            let currentState = {}; // 跟踪当前的视图状态 {level, year, month, path, dateStr}
+            const quickLinksContainer = document.getElementById('quick-links-container');
+            let allData = null; 
+            let currentState = {};
 
             const monthNames = [
                 "January", "February", "March", "April", "May", "June",
@@ -56,12 +64,30 @@
                         return;
                     }
                     
-                    // 初始化应用，显示年份列表
+                    createLatestArticleLink();
                     navigateTo({ level: 'years' });
                 } catch (error) {
                     console.error('Error fetching updates:', error);
                     updatesContainer.innerHTML = `<div class="error">加载更新内容失败: ${error.message}</div>`;
                 }
+            }
+
+            // 创建最新文章链接
+            function createLatestArticleLink() {
+                const allFiles = Object.values(allData.filesByYear).flat();
+                if (allFiles.length === 0) return;
+
+                allFiles.sort((a, b) => new Date(b.date) - new Date(a.date));
+                const latestFile = allFiles[0];
+
+                const linkCard = document.createElement('a');
+                linkCard.href = '#';
+                linkCard.className = 'quick-link-card';
+                linkCard.textContent = 'Bio arXiv Today';
+                linkCard.dataset.path = latestFile.path;
+                linkCard.dataset.dateStr = latestFile.date;
+                
+                quickLinksContainer.appendChild(linkCard);
             }
             
             // 2. 导航和状态管理
@@ -70,11 +96,9 @@
                 renderCurrentView();
             }
 
-            // 3. 核心渲染函数：根据当前状态决定显示什么
+            // 3. 核心渲染函数
             function renderCurrentView() {
-                const { level } = currentState;
-
-                if (level === 'content') {
+                if (currentState.level === 'content') {
                     renderContentView();
                 } else {
                     renderListView();
@@ -94,7 +118,6 @@
                 } else if (level === 'days') {
                     listHtml = renderDayList(allData.filesByYear, year, month);
                 }
-                // Add a class to the container based on the current view level
                 const containerClass = `item-list-container ${level}-view`;
                 updatesContainer.innerHTML = `
                     ${renderBreadcrumbs()}
@@ -110,7 +133,6 @@
                         <div class="loading">少女祈禱中.....</div>
                     </div>
                 `;
-
                 try {
                     const response = await fetch(currentState.path);
                     if (!response.ok) throw new Error('无法加载内容');
@@ -139,68 +161,49 @@
                     crumbs += `<span> / </span><a href="#" class="breadcrumb-item" data-level="days" data-year="${year}" data-month="${month}">${monthNames[month]}</a>`;
                 }
                 if (level === 'content' && dateStr) {
-                    crumbs += `<span> / </span><span class="breadcrumb-current">${dateStr}</span>`; // 当前页面，不可点击
+                    crumbs += `<span> / </span><span class="breadcrumb-current">${dateStr}</span>`;
                 }
                 return `<nav class="breadcrumb-nav">${crumbs}</nav>`;
             }
 
             function renderYearList(filesByYear) {
                 const years = Object.keys(filesByYear).sort((a, b) => b - a);
-                return years.map(year => `
-                    <div class="list-item year-item" data-level="months" data-year="${year}">
-                        ${year}
-                    </div>
-                `).join('');
+                return years.map(year => `<div class="list-item year-item" data-level="months" data-year="${year}">${year}</div>`).join('');
             }
 
             function renderMonthList(filesByYear, year) {
                 const files = filesByYear[year];
-                const months = [...new Set(files.map(file => new Date(file.date).getMonth()))]
-                    .sort((a, b) => b - a);
-                return months.map(monthIndex => `
-                    <div class="list-item month-item" data-level="days" data-year="${year}" data-month="${monthIndex}">
-                        ${monthNames[monthIndex]}
-                    </div>
-                `).join('');
+                const months = [...new Set(files.map(file => new Date(file.date).getMonth()))].sort((a, b) => b - a);
+                return months.map(monthIndex => `<div class="list-item month-item" data-level="days" data-year="${year}" data-month="${monthIndex}">${monthNames[monthIndex]}</div>`).join('');
             }
 
             function renderDayList(filesByYear, year, month) {
-                const filesForMonth = filesByYear[year]
-                    .filter(file => new Date(file.date).getMonth() == month)
-                    .sort((a, b) => new Date(b.date) - new Date(a.date));
-                return filesForMonth.map(file => `
-                    <div class="list-item day-item" data-path="${file.path}" data-date-str="${file.date}">
-                        ${file.date}
-                    </div>
-                `).join('');
+                const filesForMonth = filesByYear[year].filter(file => new Date(file.date).getMonth() == month).sort((a, b) => new Date(b.date) - new Date(a.date));
+                return filesForMonth.map(file => `<div class="list-item day-item" data-path="${file.path}" data-date-str="${file.date}">${file.date}</div>`).join('');
             }
 
             // 7. 事件监听器
             function attachEventListeners() {
-                updatesContainer.addEventListener('click', function(e) {
-                    const target = e.target.closest('.list-item, .breadcrumb-item');
+                document.body.addEventListener('click', function(e) {
+                    const target = e.target.closest('.list-item, .breadcrumb-item, .quick-link-card');
                     if (!target) return;
                     e.preventDefault();
 
-                    if (target.classList.contains('day-item')) { // Changed from file-item to be more specific
+                    if (target.classList.contains('quick-link-card')) {
                         const { path, dateStr } = target.dataset;
                         const date = new Date(dateStr);
-                        navigateTo({
-                            level: 'content',
-                            year: date.getFullYear(),
-                            month: date.getMonth(),
-                            path: path,
-                            dateStr: dateStr
-                        });
+                        navigateTo({ level: 'content', year: date.getFullYear(), month: date.getMonth(), path: path, dateStr: dateStr });
+                        return;
+                    }
+                    if (target.classList.contains('day-item')) {
+                        const { path, dateStr } = target.dataset;
+                        const date = new Date(dateStr);
+                        navigateTo({ level: 'content', year: date.getFullYear(), month: date.getMonth(), path: path, dateStr: dateStr });
                     } else {
                         const { level, year, month } = target.dataset;
-                        navigateTo({
-                            level: level,
-                            year: year,
-                            month: month
-                        });
+                        navigateTo({ level: level, year: year, month: month });
                     }
-                }, { once: true }); // 使用once确保每次渲染后只绑定一次事件
+                }, { once: true });
             }
 
             // 初始化

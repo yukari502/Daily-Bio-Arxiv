@@ -94,10 +94,11 @@
                 } else if (level === 'days') {
                     listHtml = renderDayList(allData.filesByYear, year, month);
                 }
-
+                // Add a class to the container based on the current view level
+                const containerClass = `item-list-container ${level}-view`;
                 updatesContainer.innerHTML = `
                     ${renderBreadcrumbs()}
-                    <div class="item-list-container">${listHtml}</div>
+                    <div class="${containerClass}">${listHtml}</div>
                 `;
             }
             
@@ -132,13 +133,13 @@
                 let crumbs = `<a href="#" class="breadcrumb-item" data-level="years">Home</a>`;
 
                 if (year) {
-                    crumbs += ` / <a href="#" class="breadcrumb-item" data-level="months" data-year="${year}">${year}</a>`;
+                    crumbs += `<span> / </span><a href="#" class="breadcrumb-item" data-level="months" data-year="${year}">${year}</a>`;
                 }
                 if (month !== undefined && month !== null) {
-                    crumbs += ` / <a href="#" class="breadcrumb-item" data-level="days" data-year="${year}" data-month="${month}">${monthNames[month]}</a>`;
+                    crumbs += `<span> / </span><a href="#" class="breadcrumb-item" data-level="days" data-year="${year}" data-month="${month}">${monthNames[month]}</a>`;
                 }
                 if (level === 'content' && dateStr) {
-                    crumbs += ` / <span>${dateStr}</span>`; // 当前页面，不可点击
+                    crumbs += `<span> / </span><span class="breadcrumb-current">${dateStr}</span>`; // 当前页面，不可点击
                 }
                 return `<nav class="breadcrumb-nav">${crumbs}</nav>`;
             }
@@ -146,7 +147,7 @@
             function renderYearList(filesByYear) {
                 const years = Object.keys(filesByYear).sort((a, b) => b - a);
                 return years.map(year => `
-                    <div class="list-item folder-item" data-level="months" data-year="${year}">
+                    <div class="list-item year-item" data-level="months" data-year="${year}">
                         ${year}
                     </div>
                 `).join('');
@@ -157,7 +158,7 @@
                 const months = [...new Set(files.map(file => new Date(file.date).getMonth()))]
                     .sort((a, b) => b - a);
                 return months.map(monthIndex => `
-                    <div class="list-item folder-item" data-level="days" data-year="${year}" data-month="${monthIndex}">
+                    <div class="list-item month-item" data-level="days" data-year="${year}" data-month="${monthIndex}">
                         ${monthNames[monthIndex]}
                     </div>
                 `).join('');
@@ -168,7 +169,7 @@
                     .filter(file => new Date(file.date).getMonth() == month)
                     .sort((a, b) => new Date(b.date) - new Date(a.date));
                 return filesForMonth.map(file => `
-                    <div class="list-item file-item" data-path="${file.path}" data-date-str="${file.date}">
+                    <div class="list-item day-item" data-path="${file.path}" data-date-str="${file.date}">
                         ${file.date}
                     </div>
                 `).join('');
@@ -181,7 +182,7 @@
                     if (!target) return;
                     e.preventDefault();
 
-                    if (target.classList.contains('file-item')) {
+                    if (target.classList.contains('day-item')) { // Changed from file-item to be more specific
                         const { path, dateStr } = target.dataset;
                         const date = new Date(dateStr);
                         navigateTo({

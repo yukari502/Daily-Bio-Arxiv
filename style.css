@@ -33,102 +33,116 @@ a:hover {
     text-decoration: underline;
 }
 
-/* --- 新的导航样式 --- */
-
-/* 地址栏/面包屑导航 */
+/* --- Breadcrumb Navigation (地址栏样式) --- */
 .breadcrumb-nav {
-    padding: 15px 20px;
-    background-color: #ffffff;
+    background-color: #34495e; /* 深色背景 */
+    color: #ffffff;
+    padding: 15px 25px;
     border-radius: 8px;
     margin-bottom: 25px;
-    font-size: 1.1em;
-    border: 1px solid #e0e0e0;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    font-size: 1.2em; /* 放大字体 */
+    font-weight: 700; /* 加粗 */
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
 }
 
 .breadcrumb-nav a.breadcrumb-item {
-    color: #3498db;
-    font-weight: 500;
+    color: #ffffff; /* 链接为白色 */
+    text-decoration: none;
+    transition: opacity 0.2s;
 }
 
 .breadcrumb-nav a.breadcrumb-item:hover {
-    color: #2980b9;
+    opacity: 0.8;
+    text-decoration: underline;
 }
 
 .breadcrumb-nav span {
-    color: #555; /* 当前页面的文本颜色 */
-    font-weight: 500;
+    color: #bdc3c7; /* 分隔符和当前页面的颜色 */
+}
+.breadcrumb-nav span.breadcrumb-current {
+    color: #ffffff; /* 当前页面文本也是白色 */
+    font-weight: bold;
 }
 
-/* 导航项目列表容器 */
+/* --- Item Lists & Items (列表样式) --- */
 .item-list-container {
+    display: flex;
+    flex-direction: column;
+    gap: 15px; /* 项目之间的垂直间距 */
+}
+
+/* 只有月份和日期视图使用网格布局 */
+.item-list-container.months-view,
+.item-list-container.days-view {
     display: grid;
-    /* 响应式网格布局 */
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
     gap: 20px;
 }
 
-/* 每个可点击项目的基本样式 */
+/* 列表项基本样式 */
 .list-item {
-    color: #333;
     cursor: pointer;
-    padding: 25px 20px;
     border-radius: 8px;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.07);
     transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
     text-align: center;
-    font-size: 1.2em;
-    font-weight: 600;
-    border: 1px solid #e9ecef;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    font-weight: 700; /* 默认加粗 */
+    border: 1px solid transparent;
 }
 
 .list-item:hover {
     transform: translateY(-4px);
-    box-shadow: 0 5px 12px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 5px 12px rgba(0, 0, 0, 0.12);
 }
 
-/* "文件夹" 样式 (年, 月) */
-.folder-item {
-    background-color: #f0f8ff; /* AliceBlue */
-    color: #34495e;
+/* 年份项目样式 (加强显示) */
+.year-item {
+    background-color: #34495e;
+    color: #ffffff;
+    font-size: 2.2em;
+    padding: 25px 30px;
+    margin-bottom: 10px; /* 增加与其他年份的间距 */
+}
+.year-item:hover {
+    background-color: #4a667b;
 }
 
-.folder-item::before {
-    content: '📁';
-    margin-right: 12px;
-    font-size: 1.3em;
-    vertical-align: middle;
+/* 月份项目样式 */
+.month-item {
+    background-color: #ecf0f1;
+    color: #2c3e50;
+    font-size: 1.4em;
+    padding: 20px;
+}
+.month-item:hover {
+    background-color: #dbe4e6;
+    border-color: #bdc3c7;
 }
 
-/* "文件" 样式 (日) */
-.file-item {
+/* 日期项目样式 */
+.day-item {
     background-color: #ffffff;
-    font-family: 'Courier New', Courier, monospace; /* 日期使用等宽字体更美观 */
+    color: #333;
     font-size: 1.1em;
+    padding: 15px;
+    border-color: #e9ecef;
+}
+.day-item:hover {
+    background-color: #f8f9fa;
+    border-color: #ced4da;
 }
 
-.file-item::before {
-    content: '📄';
-    margin-right: 12px;
-    font-size: 1.3em;
-    vertical-align: middle;
-}
-
-/* 内容显示区域 */
+/* --- 内容显示区域 --- */
 #content-display {
     background-color: #ffffff;
     padding: 20px 30px;
     border-radius: 8px;
     box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     border: 1px solid #ddd;
-    margin-top: 20px;
+    margin-top: 20px; /* 与地址栏保持距离 */
 }
 
-/* --- 通用及内容样式 (大部分保留自原版) --- */
-
+/* --- 通用及内容样式 --- */
 .loading {
     text-align: center;
     padding: 30px;
@@ -175,7 +189,7 @@ a:hover {
     margin-bottom: 5px;
 }
 
-/* 响应式设计 */
+/* --- 响应式设计 --- */
 @media (max-width: 768px) {
     body {
         padding: 15px;
@@ -185,14 +199,22 @@ a:hover {
         font-size: 2em;
         margin-bottom: 30px;
     }
-
-    .item-list-container {
-        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-        gap: 15px;
+    
+    .breadcrumb-nav {
+        font-size: 1em;
+        padding: 12px 18px;
+    }
+    
+    .year-item {
+        font-size: 1.8em;
     }
 
-    .list-item {
-        padding: 20px 15px;
-        font-size: 1.1em;
+    .month-item {
+        font-size: 1.2em;
+    }
+
+    .item-list-container.months-view,
+    .item-list-container.days-view {
+        grid-template-columns: 1fr; /* 在小屏幕上，月份和日期也变为单列 */
     }
 }

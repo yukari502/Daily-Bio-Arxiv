@@ -220,3 +220,45 @@ a:hover {
         grid-template-columns: 1fr;
     }
 }
+
+/* ... a meglévő stílusok ... */
+
+/* --- Elválasztó és Lábléc --- */
+.footer-divider {
+    border: none;
+    border-top: 1px solid #e0e0e0;
+    margin-top: 50px;
+    margin-bottom: 30px;
+}
+
+.site-footer {
+    text-align: center;
+    padding: 20px 0;
+    font-size: 0.9em;
+    color: #6c757d; /* Szürke szövegszín */
+}
+
+.site-footer p {
+    margin-bottom: 10px;
+}
+
+.site-footer a {
+    color: #555;
+    font-weight: 600;
+    text-decoration: underline;
+}
+
+.site-footer a:hover {
+    color: #000;
+}
+
+.site-footer .disclaimer {
+    margin-top: 20px;
+    font-size: 0.85em;
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
+    line-height: 1.6;
+}
+
+/* ... a meglévő @media lekérdezések ... */

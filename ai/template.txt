@@ -3,7 +3,7 @@ Your task is to analyze the following paper summary.
 
 1. Create a very brief, one-sentence summary (TL;DR) of the paper's core contribution in {language}.
 2. Extract the other key information (motivation, method, result, conclusion) in {language}.
-3. Translate the original summary into fluent Chinese.
+3. Translate the original summary into fluent {language}.
 
 Paper Summary:
 {content}

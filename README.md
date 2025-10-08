@@ -54,4 +54,4 @@ Navigate to the `Actions` tab in your repository and select the **arXiv-daily** 
 
 ## Customization
 
-To change the appearance of the web page, you can modify the `index.html` file.
+To change the appearance of the web page, you should modify the `index.html` file.

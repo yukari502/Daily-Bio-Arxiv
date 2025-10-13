@@ -25,7 +25,7 @@
 [data-theme="dark"] {
     /* Dark mode variables */
     --bg-color: #1a1a1a;
-    --text-color: #e0e0e0;
+    --text-color: #ffffff;
     --heading-color: #ffffff;
     --link-color: #61afef;
     --link-hover-color: #88c0f0;
@@ -33,11 +33,11 @@
     --quick-link-color: #ffffff;
     --breadcrumb-bg: #2c3e50;
     --breadcrumb-color: #ffffff;
-    --breadcrumb-hover: #bdc3c7;
+    --breadcrumb-hover: #ffffff;
 
     /* Dark mode Markdown content variables */
     --markdown-bg: #2d2d2d;
-    --markdown-text: #e0e0e0;
+    --markdown-text: #ffffff;
     --markdown-heading: #ffffff;
     --markdown-border: #404040;
     --markdown-blockquote-bg: #363636;
@@ -355,7 +355,6 @@ a:hover {
     padding-left: 15px;
     margin-left: 0;
     color: var(--markdown-text);
-    color: #555;
     font-style: italic;
 }
 .markdown-content pre {
@@ -369,8 +368,23 @@ a:hover {
 }
 
 /* Utility classes */
-.loading { text-align: center; padding: 30px; font-style: italic; color: #777; font-size: 1.1em; }
-.error { color: #e74c3c; padding: 15px; background-color: #fdedec; border-radius: 8px; margin: 20px 0; border: 1px solid #e74c3c; }
+.loading { 
+    text-align: center; 
+    padding: 30px; 
+    font-style: italic; 
+    color: var(--text-color); 
+    opacity: 0.7;
+    font-size: 1.1em; 
+}
+
+.error { 
+    color: #e74c3c; 
+    padding: 15px; 
+    background-color: var(--markdown-blockquote-bg); 
+    border-radius: 8px; 
+    margin: 20px 0; 
+    border: 1px solid #e74c3c; 
+}
 .markdown-content h1, .markdown-content h2, .markdown-content h3 { color: #34495e; margin-top: 25px; margin-bottom: 10px; font-weight: 600; border-bottom: 2px solid #ecf0f1; padding-bottom: 5px; }
 
 /* Responsive design */

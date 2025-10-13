@@ -298,6 +298,54 @@ a:hover {
     border: 1px solid var(--markdown-border);
     margin-top: 20px;
     color: var(--markdown-text);
+}
+
+/* Table of Contents and category list styling */
+.markdown-content table {
+    color: var(--markdown-text);
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1em 0;
+}
+
+.markdown-content th {
+    color: var(--markdown-text);
+    border-bottom: 2px solid var(--markdown-border);
+    padding: 8px;
+    text-align: left;
+}
+
+.markdown-content td {
+    color: var(--markdown-text);
+    border-bottom: 1px solid var(--markdown-border);
+    padding: 8px;
+}
+
+.markdown-content ul {
+    color: var(--markdown-text);
+    list-style-type: disc;
+    padding-left: 20px;
+}
+
+.markdown-content ul li {
+    color: var(--markdown-text);
+    margin: 5px 0;
+}
+
+/* Specific styling for category links like q-bio.QM */
+.markdown-content a[href*="q-bio"] {
+    color: var(--link-color);
+    font-family: monospace;
+    background-color: var(--markdown-code-bg);
+    padding: 2px 6px;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+}
+
+.markdown-content a[href*="q-bio"]:hover {
+    color: var(--link-hover-color);
+    text-decoration: none;
+    background-color: var(--markdown-blockquote-bg);
     transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
 }
 

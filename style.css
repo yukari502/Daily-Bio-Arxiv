@@ -1,17 +1,107 @@
+:root {
+    /* Light mode variables */
+    --bg-color: #f0f2f5;
+    --text-color: #333;
+    --heading-color: #2c3e50;
+    --link-color: #3498db;
+    --link-hover-color: #2980b9;
+    --quick-link-bg: #3498db;
+    --quick-link-color: #ffffff;
+    --breadcrumb-bg: #34495e;
+    --breadcrumb-color: #ffffff;
+    --breadcrumb-hover: #bdc3c7;
+}
+
+[data-theme="dark"] {
+    /* Dark mode variables */
+    --bg-color: #1a1a1a;
+    --text-color: #e0e0e0;
+    --heading-color: #ffffff;
+    --link-color: #61afef;
+    --link-hover-color: #88c0f0;
+    --quick-link-bg: #2c3e50;
+    --quick-link-color: #ffffff;
+    --breadcrumb-bg: #2c3e50;
+    --breadcrumb-color: #ffffff;
+    --breadcrumb-hover: #bdc3c7;
+}
+
+@media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+        /* Same as dark mode variables */
+        --bg-color: #1a1a1a;
+        --text-color: #e0e0e0;
+        --heading-color: #ffffff;
+        --link-color: #61afef;
+        --link-hover-color: #88c0f0;
+        --quick-link-bg: #2c3e50;
+        --quick-link-color: #ffffff;
+        --breadcrumb-bg: #2c3e50;
+        --breadcrumb-color: #ffffff;
+        --breadcrumb-hover: #bdc3c7;
+    }
+}
+
 body {
     font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
     line-height: 1.7;
-    color: #333;
+    color: var(--text-color);
     max-width: 1000px;
     margin: 0 auto;
     padding: 30px;
-    background-color: #f0f2f5;
+    background-color: var(--bg-color);
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+#theme-toggle {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: none;
+    background: var(--quick-link-bg);
+    color: var(--quick-link-color);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    z-index: 1000;
+}
+
+#theme-toggle:hover {
+    transform: scale(1.1);
+}
+
+#theme-toggle svg {
+    width: 24px;
+    height: 24px;
+    fill: currentColor;
+}
+
+#theme-toggle .sun-icon {
+    display: none;
+}
+
+#theme-toggle .moon-icon {
+    display: block;
+}
+
+[data-theme="dark"] #theme-toggle .sun-icon {
+    display: block;
+}
+
+[data-theme="dark"] #theme-toggle .moon-icon {
+    display: none;
 }
 
 h1 {
     text-align: center;
     margin-bottom: 40px;
-    color: #2c3e50;
+    color: var(--heading-color);
     font-size: 2.5em;
     font-weight: 700;
     letter-spacing: 0.5px;
@@ -19,35 +109,35 @@ h1 {
 
 p {
     margin-bottom: 15px;
-    color: #555;
+    color: var(--text-color);
 }
 
 a {
-    color: #3498db;
+    color: var(--link-color);
     text-decoration: none;
     transition: color 0.3s ease;
 }
 
 a:hover {
-    color: #2980b9;
+    color: var(--link-hover-color);
     text-decoration: underline;
 }
 
 /* --- 快捷链接卡片样式 --- */
 .quick-link-card {
-    display: flex; /* 改为flex布局以对齐箭头 */
+    display: flex;
     justify-content: center;
     align-items: center;
-    background-color: #3498db;
-    color: #ffffff;
+    background-color: var(--quick-link-bg);
+    color: var(--quick-link-color);
     padding: 20px 25px;
     border-radius: 8px;
-    margin-bottom: 40px; /* 建议2: 增加下方间距 */
+    margin-bottom: 40px;
     font-size: 1.5em;
     font-weight: 700;
     text-align: center;
     text-decoration: none;
-    box-shadow: 0 4px 10px rgba(52, 152, 219, 0.4);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
     transition: all 0.2s ease-in-out;
 }
 

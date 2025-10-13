@@ -143,7 +143,7 @@ a:hover {
     text-decoration: underline;
 }
 
-/* --- 快捷链接卡片样式 --- */
+/* Quick link card */
 .quick-link-card {
     display: flex;
     justify-content: center;
@@ -168,7 +168,7 @@ a:hover {
     color: #ffffff;
 }
 
-/* --- 历史索引标题样式 --- */
+/* Archive history title */
 .history-title {
     color: #34495e;
     text-align: center;
@@ -178,7 +178,7 @@ a:hover {
     padding-bottom: 10px;
 }
 
-/* --- 地址栏样式 --- */
+/* Breadcrumb navigation */
 .breadcrumb-nav {
     background-color: #34495e;
     color: #ffffff;
@@ -204,7 +204,7 @@ a:hover {
 .breadcrumb-nav span { color: #bdc3c7; }
 .breadcrumb-nav span.breadcrumb-current { color: #ffffff; font-weight: bold; }
 
-/* --- 列表及项目样式 --- */
+/* List items and containers */
 .item-list-container {
     display: flex;
     flex-direction: column;
@@ -236,13 +236,13 @@ a:hover {
     box-shadow: 0 5px 12px rgba(0, 0, 0, 0.12);
 }
 
-/* 建议2: 增加点击反馈 */
+/* Click feedback animation */
 .list-item:active, .quick-link-card:active {
     transform: translateY(1px);
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
-/* 建议2: 箭头样式 */
+/* Arrow icon styling */
 .arrow {
     margin-left: 15px;
     font-size: 1.2em;
@@ -289,7 +289,7 @@ a:hover {
     border-color: var(--markdown-blockquote-border); 
 }
 
-/* --- 内容显示区域 --- */
+/* Content display area */
 #content-display {
     background-color: var(--markdown-bg);
     padding: 20px 30px;
@@ -349,7 +349,7 @@ a:hover {
     transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
 }
 
-/* 建议2: 优化内容页可读性 */
+/* Markdown content typography */
 .markdown-content blockquote {
     border-left: 4px solid var(--link-color);
     padding-left: 15px;
@@ -368,12 +368,12 @@ a:hover {
     font-family: 'Courier New', Courier, monospace;
 }
 
-/* ... 其他样式 ... */
+/* Utility classes */
 .loading { text-align: center; padding: 30px; font-style: italic; color: #777; font-size: 1.1em; }
 .error { color: #e74c3c; padding: 15px; background-color: #fdedec; border-radius: 8px; margin: 20px 0; border: 1px solid #e74c3c; }
 .markdown-content h1, .markdown-content h2, .markdown-content h3 { color: #34495e; margin-top: 25px; margin-bottom: 10px; font-weight: 600; border-bottom: 2px solid #ecf0f1; padding-bottom: 5px; }
 
-/* --- 响应式设计 --- */
+/* Responsive design */
 @media (max-width: 768px) {
     body { padding: 15px; }
     h1 { font-size: 2em; }
@@ -388,9 +388,7 @@ a:hover {
     }
 }
 
-/* ... a meglévő stílusok ... */
-
-/* --- Elválasztó és Lábléc --- */
+/* Footer and divider */
 .footer-divider {
     border: none;
     border-top: 1px solid #e0e0e0;

@@ -10,6 +10,16 @@
     --breadcrumb-bg: #34495e;
     --breadcrumb-color: #ffffff;
     --breadcrumb-hover: #bdc3c7;
+    
+    /* Markdown content variables */
+    --markdown-bg: #ffffff;
+    --markdown-text: #333;
+    --markdown-heading: #34495e;
+    --markdown-border: #ecf0f1;
+    --markdown-blockquote-bg: #f8f9fa;
+    --markdown-blockquote-border: #e9ecef;
+    --markdown-code-bg: #f8f9fa;
+    --markdown-pre-bg: #f8f9fa;
 }
 
 [data-theme="dark"] {
@@ -24,6 +34,16 @@
     --breadcrumb-bg: #2c3e50;
     --breadcrumb-color: #ffffff;
     --breadcrumb-hover: #bdc3c7;
+
+    /* Dark mode Markdown content variables */
+    --markdown-bg: #2d2d2d;
+    --markdown-text: #e0e0e0;
+    --markdown-heading: #ffffff;
+    --markdown-border: #404040;
+    --markdown-blockquote-bg: #363636;
+    --markdown-blockquote-border: #404040;
+    --markdown-code-bg: #363636;
+    --markdown-pre-bg: #363636;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -249,35 +269,44 @@ a:hover {
 .year-item:hover .arrow { color: #ffffff; }
 
 .month-item {
-    background-color: #ecf0f1;
-    color: #2c3e50;
+    background-color: var(--markdown-blockquote-bg);
+    color: var(--text-color);
     font-size: 1.4em;
 }
-.month-item:hover { background-color: #dbe4e6; border-color: #bdc3c7; }
+.month-item:hover { 
+    background-color: var(--markdown-code-bg); 
+    border-color: var(--markdown-border); 
+}
 
 .day-item {
-    background-color: #ffffff;
-    color: #333;
+    background-color: var(--markdown-bg);
+    color: var(--text-color);
     font-size: 1.1em;
-    border-color: #e9ecef;
+    border-color: var(--markdown-border);
 }
-.day-item:hover { background-color: #f8f9fa; border-color: #ced4da; }
+.day-item:hover { 
+    background-color: var(--markdown-blockquote-bg); 
+    border-color: var(--markdown-blockquote-border); 
+}
 
 /* --- 内容显示区域 --- */
 #content-display {
-    background-color: #ffffff;
+    background-color: var(--markdown-bg);
     padding: 20px 30px;
     border-radius: 8px;
     box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    border: 1px solid #ddd;
+    border: 1px solid var(--markdown-border);
     margin-top: 20px;
+    color: var(--markdown-text);
+    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
 }
 
 /* 建议2: 优化内容页可读性 */
 .markdown-content blockquote {
-    border-left: 4px solid #3498db;
+    border-left: 4px solid var(--link-color);
     padding-left: 15px;
     margin-left: 0;
+    color: var(--markdown-text);
     color: #555;
     font-style: italic;
 }

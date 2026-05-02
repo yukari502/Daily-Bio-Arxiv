@@ -11,32 +11,31 @@ if __name__ == "__main__":
     preference = os.environ.get('CATEGORIES', 'cs.CV, cs.CL').split(',')
     preference = list(map(lambda x: x.strip(), preference))
     def rank(cate):
-        if cate in preference:
-            return preference.index(cate)
-        else:
-            return len(preference)
+        for idx, p in enumerate(preference):
+            if cate == p or cate.startswith(p + "."):
+                return idx
+        return len(preference)
 
     with open(args.data, "r") as f:
         for line in f:
             data.append(json.loads(line))
 
-    # Ensure papers are grouped under the preferred categories if they are cross-listed
-    for item in data:
-        item["display_category"] = item["categories"][0]
-        for cat in item["categories"]:
-            if cat in preference:
-                item["display_category"] = cat
-                break
+    def is_preferred(primary_cat):
+        for p in preference:
+            if primary_cat == p or primary_cat.startswith(p + "."):
+                return True
+        return False
 
-    categories = set([item["display_category"] for item in data if item["display_category"] in preference])
+    # Filter out cross-listed papers: only keep papers whose PRIMARY category matches our preference
+    data = [item for item in data if is_preferred(item["categories"][0])]
+
+    categories = set([item["categories"][0] for item in data])
     
     template = open("paper_template.md", "r", encoding="utf-8").read()
     categories = sorted(categories, key=rank)
     cnt = {cate: 0 for cate in categories}
     for item in data:
-        if item.get("display_category") not in cnt.keys():
-            continue
-        cnt[item["display_category"]] += 1
+        cnt[item["categories"][0]] += 1
 
     markdown = f"<div id=toc></div>\n\n# Table of Contents\n\n"
     for idx, cate in enumerate(categories):
@@ -58,10 +57,10 @@ if __name__ == "__main__":
                     method=item['AI']['method'],
                     result=item['AI']['result'],
                     conclusion=item['AI']['conclusion'],
-                    cate=item['display_category'],
+                    cate=item['categories'][0],
                     idx=next(idx)
                 )
-                for item in data if item.get("display_category") == cate
+                for item in data if item["categories"][0] == cate
             ]
         )
     with open(args.data.split('_')[0] + '.md', "w") as f:

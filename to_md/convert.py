@@ -20,14 +20,23 @@ if __name__ == "__main__":
         for line in f:
             data.append(json.loads(line))
 
-    categories = set([item["categories"][0] for item in data])
-    template = open("paper_template.md", "r").read()
+    # Ensure papers are grouped under the preferred categories if they are cross-listed
+    for item in data:
+        item["display_category"] = item["categories"][0]
+        for cat in item["categories"]:
+            if cat in preference:
+                item["display_category"] = cat
+                break
+
+    categories = set([item["display_category"] for item in data if item["display_category"] in preference])
+    
+    template = open("paper_template.md", "r", encoding="utf-8").read()
     categories = sorted(categories, key=rank)
     cnt = {cate: 0 for cate in categories}
     for item in data:
-        if item["categories"][0] not in cnt.keys():
+        if item.get("display_category") not in cnt.keys():
             continue
-        cnt[item["categories"][0]] += 1
+        cnt[item["display_category"]] += 1
 
     markdown = f"<div id=toc></div>\n\n# Table of Contents\n\n"
     for idx, cate in enumerate(categories):
@@ -49,10 +58,10 @@ if __name__ == "__main__":
                     method=item['AI']['method'],
                     result=item['AI']['result'],
                     conclusion=item['AI']['conclusion'],
-                    cate=item['categories'][0],
+                    cate=item['display_category'],
                     idx=next(idx)
                 )
-                for item in data if item["categories"][0] == cate
+                for item in data if item.get("display_category") == cate
             ]
         )
     with open(args.data.split('_')[0] + '.md', "w") as f:

@@ -45,7 +45,10 @@ def main():
 
     print('Open:', args.data, file=sys.stderr)
 
-    llm = ChatOpenAI(model=model_name).with_structured_output(Structure, method="function_calling")
+    llm = ChatOpenAI(
+        model=model_name,
+        extra_body={"thinking": {"type": "disabled"}}
+    ).with_structured_output(Structure, method="function_calling")
     print('Connect to:', model_name, file=sys.stderr)
     prompt_template = ChatPromptTemplate.from_messages([
         SystemMessagePromptTemplate.from_template(system),

@@ -52,6 +52,7 @@ Navigate to the `Actions` tab in your repository and select the **arXiv-daily** 
 
 ---
 
-## Customization
+## Customization & Maintenance
 
-To change the appearance of the web page, you should modify the `index.html` file.
+- **Appearance**: To change the appearance of the web page, modify the `index.html` and `style.css` files.
+- **Maintenance**: For a detailed technical overview of the project's architecture, core scripts, automation workflow, and troubleshooting guidelines, please refer to the [`User_manual.md`](User_manual.md) file.

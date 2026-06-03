@@ -56,3 +56,11 @@ Navigate to the `Actions` tab in your repository and select the **arXiv-daily** 
 
 - **Appearance**: To change the appearance of the web page, modify the `index.html` and `style.css` files.
 - **Maintenance**: For a detailed technical overview of the project's architecture, core scripts, automation workflow, and troubleshooting guidelines, please refer to the [`User_manual.md`](User_manual.md) file.
+
+---
+
+## Buy Me a Coffee
+
+If you find this project helpful, consider supporting it by buying me a coffee! ☕
+
+<img src="./img/qr-code.png" alt="Buy Me a Coffee QR Code" width="300" />

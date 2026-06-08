@@ -3,6 +3,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Daily Biology arXiv Updates</title>
+    <meta name="description" content="Automated daily summaries of the latest Biology and Computer Science research papers from arXiv, powered by AI.">
+    <meta name="keywords" content="Biology, arXiv, Daily Updates, AI Summaries, Research Papers, Bioinformatics, Computational Biology">
+    <meta name="author" content="yukari502">
+    <meta property="og:title" content="Daily Biology arXiv Updates">
+    <meta property="og:description" content="Automated daily summaries of the latest Biology and Computer Science research papers from arXiv.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://yukari502.github.io/Daily-Bio-Arxiv/">
+    <meta property="og:image" content="https://yukari502.github.io/Daily-Bio-Arxiv/img/android-chrome-512x512.png">
 
     <!-- Favicon and device icons -->
     <link rel="icon" type="image/png" sizes="16x16" href="img/favicon-16x16.png">
@@ -131,7 +139,16 @@
                     const latestYearData = await fetchYearData(latestYear);
                     createLatestArticleLink(latestYearData.files[0]);
 
-                    navigateTo({ level: 'years' });
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const dateParam = urlParams.get('date');
+                    if (dateParam) {
+                        const date = new Date(dateParam);
+                        navigateTo({ level: 'content', year: date.getFullYear(), month: date.getMonth(), path: `data/${dateParam}.md`, dateStr: dateParam }, false);
+                        window.history.replaceState(currentState, '', window.location);
+                    } else {
+                        navigateTo({ level: 'years' }, false);
+                        window.history.replaceState(currentState, '', window.location);
+                    }
                 } catch (error) {
                     console.error('Error during initial fetch:', error);
                     updatesContainer.innerHTML = `<div class="error">${error.message}</div>`;
@@ -149,10 +166,39 @@
                 quickLinksContainer.appendChild(linkCard);
             }
             
-            function navigateTo(state) {
+            function navigateTo(state, pushToHistory = true) {
                 currentState = state;
                 renderCurrentView();
+
+                if (pushToHistory) {
+                    const url = new URL(window.location);
+                    if (state.level === 'content' && state.dateStr) {
+                        url.searchParams.set('date', state.dateStr);
+                    } else {
+                        url.searchParams.delete('date');
+                    }
+                    window.history.pushState(state, '', url);
+                }
             }
+
+            window.addEventListener('popstate', async function(event) {
+                if (event.state) {
+                    if ((event.state.level === 'months' || event.state.level === 'days') && !yearDataCache[event.state.year]) {
+                        updatesContainer.innerHTML = `<div class="loading">少女祈禱中.....</div>`;
+                        await fetchYearData(event.state.year);
+                    }
+                    navigateTo(event.state, false);
+                } else {
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const dateParam = urlParams.get('date');
+                    if (dateParam) {
+                        const date = new Date(dateParam);
+                        navigateTo({ level: 'content', year: date.getFullYear(), month: date.getMonth(), path: `data/${dateParam}.md`, dateStr: dateParam }, false);
+                    } else {
+                        navigateTo({ level: 'years' }, false);
+                    }
+                }
+            });
 
             function renderCurrentView() {
                 if (currentState.level === 'content') renderContentView();

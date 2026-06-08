@@ -1,0 +1,14 @@
+User-agent: *
+Allow: /
+
+# Disallow crawling of backend scripts and source code
+Disallow: /.github/
+Disallow: /ai/
+Disallow: /daily_arxiv/
+Disallow: /to_md/
+Disallow: /*.py$
+Disallow: /*.sh$
+Disallow: /*.toml$
+Disallow: /*.lock$
+
+Sitemap: https://yukari502.github.io/Daily-Bio-Arxiv/sitemap.xml

@@ -1,8 +1,30 @@
-# Daily arXiv AI Summarizer
+# Daily Biology arXiv Updates
+
+> 🌐 **Live Website**: [https://yukari502.github.io/Daily-Bio-Arxiv/](https://yukari502.github.io/Daily-Bio-Arxiv/)
 
 ## About
 
-This project is a modified by [daily-arXiv-ai-enhanced](https://github.com/Starlento/daily-arXiv-ai-enhanced) tool. It automatically fetches new papers from arXiv.org, uses a Large Language Model (LLM) to summarize them, and publishes the summaries to a GitHub Pages website.
+This project is modified from the daily-arXiv-ai-enhanced tool. It automatically fetches new papers from [arXiv.org](https://arxiv.org/) (primarily in quantitative biology, genomics, and related AI/CS categories), uses Large Language Models (LLMs) to generate concise structured summaries, and publishes the daily reports to an interactive static website hosted on **GitHub Pages**.
+
+---
+
+## 🌐 Online Website Overview
+
+Visit the live website: **[https://yukari502.github.io/Daily-Bio-Arxiv/](https://yukari502.github.io/Daily-Bio-Arxiv/)**
+
+The frontend is a lightweight, responsive Single Page Application (SPA) providing an effortless literature reading experience:
+
+- **⚡ Quick Access Links**: Jump straight into the latest paper releases from recent days with a single click.
+- **📚 Multi-Year Archive Navigation**: Easily explore historical daily updates grouped by **Year $\rightarrow$ Month $\rightarrow$ Day** through a fast, split-index catalog.
+- **🧠 5-Point AI Structured Summaries**: Every paper summary is distilled into 5 high-signal sections:
+  - **TL;DR**: One-sentence core takeaway.
+  - **Motivation**: Why the research was conducted.
+  - **Method**: The technical approach or experimental methodology.
+  - **Result**: Key discoveries and quantitative benchmarks.
+  - **Conclusion**: Main implications and future directions.
+- **🌓 Dark / Light Mode**: Seamless theme switching with system-preference detection and local persistence.
+- **📄 Direct Paper & PDF Links**: Quick access to original arXiv abstracts (`/abs/...`) and official PDF files (`/pdf/...`).
+- **📱 Fully Responsive**: Clean layout optimized for mobile phones, tablets, and desktop browsers.
 
 ---
 

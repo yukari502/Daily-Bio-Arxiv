@@ -15,8 +15,9 @@ from langchain.prompts import (
 from structure import Structure
 if os.path.exists('.env'):
     dotenv.load_dotenv()
-template = open("template.txt", "r").read()
-system = open("system.txt", "r").read()
+CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
+template = open(os.path.join(CURRENT_DIR, "template.txt"), "r", encoding="utf-8").read()
+system = open(os.path.join(CURRENT_DIR, "system.txt"), "r", encoding="utf-8").read()
 
 def parse_args():
     """解析命令行参数"""
@@ -45,10 +46,13 @@ def main():
 
     print('Open:', args.data, file=sys.stderr)
 
+    output_path = args.data.replace('.jsonl', f'_AI_enhanced_{language}.jsonl')
+    # Ensure output file exists even if empty or upon error
+    open(output_path, "w", encoding="utf-8").close()
+
     llm = ChatOpenAI(
         model=model_name,
-        extra_body={"thinking": {"type": "disabled"}}
-    ).with_structured_output(Structure, method="function_calling")
+    ).with_structured_output(Structure)
     print('Connect to:', model_name, file=sys.stderr)
     prompt_template = ChatPromptTemplate.from_messages([
         SystemMessagePromptTemplate.from_template(system),
@@ -64,8 +68,8 @@ def main():
                 "content": d['summary']
             })
             d['AI'] = response.model_dump()
-        except langchain_core.exceptions.OutputParserException as e:
-            print(f"{d['id']} has an error: {e}", file=sys.stderr)
+        except Exception as e:
+            print(f"{d['id']} error processing paper: {e}", file=sys.stderr)
             d['AI'] = {
                  "tldr": "Error",
                  "motivation": "Error",
@@ -73,8 +77,8 @@ def main():
                  "result": "Error",
                  "conclusion": "Error"
             }
-        with open(args.data.replace('.jsonl', f'_AI_enhanced_{language}.jsonl'), "a") as f:
-            f.write(json.dumps(d) + "\n")
+        with open(output_path, "a", encoding="utf-8") as f:
+            f.write(json.dumps(d, ensure_ascii=False) + "\n")
 
         print(f"Finished {idx+1}/{len(data)}", file=sys.stderr)
 

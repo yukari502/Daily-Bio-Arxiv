@@ -16,9 +16,14 @@ if __name__ == "__main__":
                 return idx
         return len(preference)
 
-    with open(args.data, "r") as f:
+    if not os.path.exists(args.data):
+        print(f"Warning: Data file {args.data} does not exist. Skipping conversion.", file=sys.stderr)
+        exit(0)
+
+    with open(args.data, "r", encoding="utf-8") as f:
         for line in f:
-            data.append(json.loads(line))
+            if line.strip():
+                data.append(json.loads(line))
 
     def is_preferred(primary_cat):
         for p in preference:
@@ -31,7 +36,8 @@ if __name__ == "__main__":
 
     categories = set([item["categories"][0] for item in data])
     
-    template = open("paper_template.md", "r", encoding="utf-8").read()
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    template = open(os.path.join(current_dir, "paper_template.md"), "r", encoding="utf-8").read()
     categories = sorted(categories, key=rank)
     cnt = {cate: 0 for cate in categories}
     for item in data:
@@ -63,5 +69,5 @@ if __name__ == "__main__":
                 for item in data if item["categories"][0] == cate
             ]
         )
-    with open(args.data.split('_')[0] + '.md', "w") as f:
+    with open(args.data.split('_')[0] + '.md', "w", encoding="utf-8") as f:
         f.write(markdown)

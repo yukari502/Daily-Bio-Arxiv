@@ -29,8 +29,14 @@ Navigate to `Settings` > `Secrets and variables` > `Actions` in your forked repo
 
 Create the following encrypted secrets:
 
--   `OPENAI_API_KEY`: Your API key for the LLM service.
+-   `OPENAI_API_KEY`: Your API key for the LLM service (e.g., `sk-or-v1-...` for OpenRouter, `sk-...` for DeepSeek/OpenAI).
 -   `OPENAI_BASE_URL`: The base URL for the LLM service's API endpoint.
+    > [!IMPORTANT]
+    > **Base URL Format Rules**: Do **not** append `/chat/completions` to the end of the base URL, as the OpenAI SDK automatically appends it.
+    > - **OpenRouter**: `https://openrouter.ai/api/v1` *(must include `/v1`)*
+    > - **DeepSeek Official**: `https://api.deepseek.com`
+    > - **OpenAI Official**: `https://api.openai.com/v1`
+    > - **SiliconFlow**: `https://api.siliconflow.cn/v1`
 
 #### Repository variables
 
@@ -38,7 +44,7 @@ Create the following variables:
 
 -   `CATEGORIES`: A comma-separated list of arXiv categories to track (e.g., `q-bio.GN,cs.CV`).
 -   `LANGUAGE`: The target language for the summaries (e.g., `Chinese`, `English`).
--   `MODEL_NAME`: The identifier for the LLM you want to use (e.g., `deepseek-chat`).
+-   `MODEL_NAME`: The model identifier for the LLM service.
 -   `EMAIL`: The email address to use for Git commits.
 -   `NAME`: The name to use for Git commits.
 

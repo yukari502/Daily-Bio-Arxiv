@@ -38,7 +38,7 @@ The entire process is orchestrated by `run.sh` and triggered daily at 16:30 UTC 
 - **`ai/enhance.py`**:
   - *Function*: Connects to the configured LLM using LangChain's `ChatOpenAI`. 
   - It uses the `.with_structured_output(Structure)` method to force the LLM to return data matching a strict Pydantic schema (TLDR, motivation, method, result, conclusion).
-  - Contains error handling: If the LLM fails to parse or output the correct structure, it gracefully catches `OutputParserException` and assigns "Error" to the fields to prevent pipeline failure.
+  - *Fault Tolerance & File Safety*: Initializes the target output file before processing to ensure downstream stages never encounter `FileNotFoundError`. Catches both parsing errors and runtime API exceptions (e.g., 404, 429, timeouts), assigning "Error" to failed items while continuing to process the remaining papers.
 
 ### 4.4 Formatting & Indexing
 - **`to_md/convert.py`**:
@@ -65,9 +65,13 @@ During the lifecycle of maintaining this website, several technical issues may a
 - **IP Blocking/Rate Limiting:** Scrapy might get temporarily blocked if it hits arXiv too aggressively. *Fix: Adjust Scrapy's `DOWNLOAD_DELAY` in `settings.py` if blocking occurs.*
 
 ### 6.2 AI & LLM API Issues
-- **API Key Expiration / Insufficient Quota:** The GitHub Action will fail if the OpenAI API key runs out of funds or expires. *Fix: Monitor API usage and update the `OPENAI_API_KEY` secret in GitHub Repository Settings.*
+- **HTTP 404 Not Found (`openai.NotFoundError`):**
+  - *Cause 1 (Wrong Base URL)*: LangChain's `ChatOpenAI` appends `/chat/completions` automatically. If `OPENAI_BASE_URL` is configured as `https://openrouter.ai/api` (missing `/v1`) or `https://openrouter.ai/api/v1/chat/completions` (duplicated path), the endpoint will return a 404 error. *Fix: Ensure `OPENAI_BASE_URL` is exactly `https://openrouter.ai/api/v1` for OpenRouter.*
+  - *Cause 2 (Deprecated/Renamed Model Slug)*: The model ID specified in `MODEL_NAME` may not exist or may have been retired on the provider. *Fix: Check the provider's active catalog (e.g., `https://openrouter.ai/models`) and update `MODEL_NAME` to an active slug (e.g. `deepseek/deepseek-chat` or `deepseek/deepseek-v4.1-flash`).*
+  - *Cause 3 (No Available Provider / Policy Filtering)*: On OpenRouter, if user account privacy settings restrict data retention or provider allowlists such that no active upstream hosts support the model, OpenRouter returns 404. *Fix: Check OpenRouter Account Settings -> Privacy/Providers.*
+- **API Key Expiration / Insufficient Quota:** The GitHub Action will fail with a 401/402 error if the API key runs out of credits or expires. *Fix: Check balance on your provider platform and update `OPENAI_API_KEY` in GitHub Repository Secrets.*
 - **Context Length Limitations:** If an arXiv summary is extraordinarily long, it might exceed the LLM's context window. *Fix: Implement truncation in `enhance.py` before sending the prompt to the LLM.*
-- **Output Parsing Errors:** LLMs occasionally fail to output valid JSON matching the LangChain schema. The script currently handles this by outputting "Error". *Fix: If errors become frequent, refine the prompts (`template.txt`, `system.txt`) or switch to a more capable model via the `MODEL_NAME` GitHub variable.*
+- **Output Parsing Errors:** LLMs occasionally fail to output valid JSON matching the LangChain schema. The script handles this by outputting "Error" in the field and continuing pipeline execution. *Fix: If errors become frequent, refine the prompts (`template.txt`, `system.txt`) or switch to a more capable model via the `MODEL_NAME` GitHub variable.*
 
 ### 6.3 Repository Size Accumulation
 - **Git Bloat:** Storing daily `.jsonl` and `.md` files will eventually cause the Git repository size to grow significantly. While text compresses well, years of daily updates might slow down the `actions/checkout` step. *Fix: Periodically archive old data or implement a script to squash old commits.*

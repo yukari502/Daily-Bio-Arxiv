@@ -30,9 +30,9 @@ The entire process is orchestrated by `run.sh` and triggered daily at 16:30 UTC 
 
 ### 4.2 Scraping (`daily_arxiv/`)
 - **`daily_arxiv/spiders/arxiv.py`**: A Scrapy spider (`ArxivSpider`). 
-  - *Function*: Reads `CATEGORIES` from the environment, visits `https://arxiv.org/list/{cat}/new`, and uses CSS selectors to extract the IDs of new papers. It prevents scraping older papers by checking against anchor elements on the page.
+  - *Function*: Reads `CATEGORIES` from the environment and visits `https://arxiv.org/list/{cat}/new`. Filters out older replacement submissions using anchor elements, and directly parses full paper metadata (Title, Authors, Categories, Comments, Abstract Summary) from the DL/DT/DD HTML nodes in sub-second speed.
 - **`daily_arxiv/pipelines.py`**: 
-  - *Function*: `DailyArxivPipeline.process_item` receives paper IDs from the spider. It uses the `arxiv` Python library's `Search` client to fetch comprehensive metadata (authors, title, categories, summary, PDF links) robustly without further HTML scraping.
+  - *Function*: `DailyArxivPipeline.process_item` checks the scraped item. If full metadata is already present, it bypasses external network calls entirely. It acts as an automated fallback, querying the `arxiv` library's `Search` client only if HTML extraction is incomplete.
 
 ### 4.3 AI Enhancement (`ai/`)
 - **`ai/enhance.py`**:

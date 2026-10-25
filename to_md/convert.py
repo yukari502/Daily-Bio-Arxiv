@@ -69,5 +69,6 @@ if __name__ == "__main__":
                 for item in data if item["categories"][0] == cate
             ]
         )
-    with open(args.data.split('_')[0] + '.md', "w", encoding="utf-8") as f:
+    md_filename = (args.data.split('_AI_enhanced_')[0] if '_AI_enhanced_' in args.data else args.data.rsplit('.', 1)[0]) + '.md'
+    with open(md_filename, "w", encoding="utf-8") as f:
         f.write(markdown)

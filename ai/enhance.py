@@ -21,62 +21,76 @@ def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("--data", type=str, required=True, help="jsonline data file")
     parser.add_argument("--concurrency", type=int, default=5, help="max concurrent requests")
+    parser.add_argument("--timeout", type=float, default=40.0, help="timeout in seconds per request")
     return parser.parse_args()
 
-async def call_llm_with_fallback(client: AsyncOpenAI, model_name: str, system_prompt: str, user_prompt: str) -> dict:
+async def call_llm_with_fallback(client: AsyncOpenAI, model_name: str, system_prompt: str, user_prompt: str, timeout: float = 40.0) -> dict:
     """
     尝试使用原生 Structured Outputs (json_schema) 严格解析；
     若特定模型/提供商不支持严格 json_schema，自动回退到 json_object 模式解析。
+    添加显式超时限制，防止第三方聚合平台节点无响应挂死。
     """
     try:
-        completion = await client.beta.chat.completions.parse(
-            model=model_name,
-            messages=[
-                {"role": "system", "content": system_prompt},
-                {"role": "user", "content": user_prompt}
-            ],
-            response_format=Structure,
+        completion = await asyncio.wait_for(
+            client.beta.chat.completions.parse(
+                model=model_name,
+                messages=[
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": user_prompt}
+                ],
+                response_format=Structure,
+            ),
+            timeout=timeout
         )
         parsed = completion.choices[0].message.parsed
         if parsed:
             return parsed.model_dump()
+    except asyncio.TimeoutError:
+        raise TimeoutError(f"Request timed out after {timeout}s")
     except Exception as e:
         # 回退到 json_object 模式解析并由 Pydantic 进行校验
         fallback_prompt = (
             system_prompt + "\n\nRespond with valid JSON containing the following keys: "
             "tldr, motivation, method, result, conclusion."
         )
-        completion = await client.chat.completions.create(
-            model=model_name,
-            messages=[
-                {"role": "system", "content": fallback_prompt},
-                {"role": "user", "content": user_prompt}
-            ],
-            response_format={"type": "json_object"},
-        )
-        content = completion.choices[0].message.content
-        if content:
-            raw_dict = json.loads(content)
-            return Structure(**raw_dict).model_dump()
-        raise e
+        try:
+            completion = await asyncio.wait_for(
+                client.chat.completions.create(
+                    model=model_name,
+                    messages=[
+                        {"role": "system", "content": fallback_prompt},
+                        {"role": "user", "content": user_prompt}
+                    ],
+                    response_format={"type": "json_object"},
+                ),
+                timeout=timeout
+            )
+            content = completion.choices[0].message.content
+            if content:
+                raw_dict = json.loads(content)
+                return Structure(**raw_dict).model_dump()
+        except asyncio.TimeoutError:
+            raise TimeoutError(f"Fallback request timed out after {timeout}s")
+        except Exception:
+            raise e
 
     raise ValueError("LLM returned empty parsed structure.")
 
-async def process_single_paper(client: AsyncOpenAI, sem: asyncio.Semaphore, model_name: str, language: str, item: dict, idx: int, total: int, max_retries: int = 2) -> dict:
+async def process_single_paper(client: AsyncOpenAI, sem: asyncio.Semaphore, model_name: str, language: str, item: dict, idx: int, total: int, timeout: float = 40.0, max_retries: int = 2) -> dict:
     system_prompt = SYSTEM_TEMPLATE.format(language=language)
     user_prompt = HUMAN_TEMPLATE.format(content=item['summary'])
 
     async with sem:
         for attempt in range(max_retries + 1):
             try:
-                res_dict = await call_llm_with_fallback(client, model_name, system_prompt, user_prompt)
+                res_dict = await call_llm_with_fallback(client, model_name, system_prompt, user_prompt, timeout=timeout)
                 item['AI'] = res_dict
                 print(f"[{idx+1}/{total}] Finished: {item['id']}", file=sys.stderr)
                 return item
             except Exception as e:
                 if attempt < max_retries:
-                    wait_time = 2 ** attempt
-                    print(f"[{idx+1}/{total}] Retrying {item['id']} in {wait_time}s due to error: {e}", file=sys.stderr)
+                    wait_time = 1.5 ** attempt
+                    print(f"[{idx+1}/{total}] Retrying {item['id']} in {wait_time:.1f}s (attempt {attempt+1}/{max_retries}) due to: {e}", file=sys.stderr)
                     await asyncio.sleep(wait_time)
                 else:
                     print(f"[{idx+1}/{total}] Error for {item['id']} after {max_retries+1} attempts: {e}", file=sys.stderr)
@@ -112,7 +126,7 @@ async def main_async():
 
     print('Open:', args.data, file=sys.stderr)
     print('Connect to:', model_name, file=sys.stderr)
-    print(f'Total papers: {total}, concurrency: {args.concurrency}', file=sys.stderr)
+    print(f'Total papers: {total}, concurrency: {args.concurrency}, timeout: {args.timeout}s', file=sys.stderr)
 
     output_path = args.data.replace('.jsonl', f'_AI_enhanced_{language}.jsonl')
     # 提前初始化目标文件，防止下游脚本出现 FileNotFoundError
@@ -127,19 +141,26 @@ async def main_async():
         base_url=os.environ.get("OPENAI_BASE_URL"),
         api_key=os.environ.get("OPENAI_API_KEY"),
         default_headers=default_headers,
+        timeout=args.timeout + 5.0,
     )
 
     sem = asyncio.Semaphore(args.concurrency)
-    tasks = [
-        process_single_paper(client, sem, model_name, language, item, idx, total)
-        for idx, item in enumerate(data)
-    ]
+    results = [None] * total
+    file_lock = asyncio.Lock()
 
-    enhanced_data = await asyncio.gather(*tasks)
+    async def worker(item, idx):
+        res = await process_single_paper(client, sem, model_name, language, item, idx, total, timeout=args.timeout)
+        results[idx] = res
+        # 实时渐进式落盘，保证已完成的内容即时保存
+        async with file_lock:
+            with open(output_path, "w", encoding="utf-8") as f:
+                for r in results:
+                    if r is not None:
+                        f.write(json.dumps(r, ensure_ascii=False) + "\n")
+        return res
 
-    with open(output_path, "w", encoding="utf-8") as f:
-        for item in enhanced_data:
-            f.write(json.dumps(item, ensure_ascii=False) + "\n")
+    tasks = [worker(item, idx) for idx, item in enumerate(data)]
+    await asyncio.gather(*tasks)
 
     print(f"Finished all {total} papers. Output saved to {output_path}", file=sys.stderr)
 

@@ -8,13 +8,10 @@ on:
       - completed
     branches:
       - main
-  schedule:
-    - cron: "30 17 * * *" 
   push:
     branches:
       - main
 
-    
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 

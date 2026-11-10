@@ -1,13 +1,15 @@
 # OS files
 .DS_Store
 Thumbs.db
+
+# Python
 __pycache__/
-*.pyc
-*.pyo
-*.pyd
+*.py[cod]
+*$py.class
 .pytest_cache/
 .venv/
 venv/
 .env
-__pycache__/
-*.pyc
+
+# Data pipeline intermediate files
+*.jsonl
